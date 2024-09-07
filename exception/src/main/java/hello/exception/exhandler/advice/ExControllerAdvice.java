@@ -1,5 +1,6 @@
 package hello.exception.exhandler.advice;
 
+import hello.exception.api.ApiExceptionV2Controller;
 import hello.exception.exception.UserException;
 import hello.exception.exhandler.ErrorResult;
 import lombok.extern.slf4j.Slf4j;
@@ -7,11 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 
 @Slf4j
-@RestControllerAdvice
+//@RestControllerAdvice(assignableTypes = ApiExceptionV2Controller.class) // 클래스 지정
+@RestControllerAdvice // 대상을 지정하지 않으면 글로벌 적용
 public class ExControllerAdvice {
 
     // 정상 흐름으로 반환되기 떄문에 즉, 200으로 반환 되기 떄문에 ResponseStatus 통해서 상태 코드 전달
@@ -24,6 +27,7 @@ public class ExControllerAdvice {
     }
 
     // @ExceptionHandler에 UserException을 넣지 않으면 메서드 파라미터 예외를 사용된다.
+
     @ExceptionHandler
     public ResponseEntity<ErrorResult> userExHandler(UserException e){
         log.error("[exceptionHandler ex", e);
