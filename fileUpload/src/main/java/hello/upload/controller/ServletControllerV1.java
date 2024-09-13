@@ -23,6 +23,7 @@ public class ServletControllerV1 {
         return "upload-form";
     }
 
+    // 파일 업로드
     @PostMapping("/upload")
     public String saveFileV1(HttpServletRequest request) throws ServletException, IOException {
         log.info("request={}", request);
