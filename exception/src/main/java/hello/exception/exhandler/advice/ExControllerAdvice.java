@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 //@RestControllerAdvice(assignableTypes = ApiExceptionV2Controller.class) // 클래스 지정
-@RestControllerAdvice // 대상을 지정하지 않으면 글로벌 적용
+//@RestControllerAdvice("hello.exception.api") // 특정 패키지 지정 가능
+@RestControllerAdvice(basePackages = "hello.exception.api") // 대상을 지정하지 않으면 글로벌 적용
 public class ExControllerAdvice {
 
     // 정상 흐름으로 반환되기 떄문에 즉, 200으로 반환 되기 떄문에 ResponseStatus 통해서 상태 코드 전달
