@@ -1,2 +1,6 @@
 /.idea/
 /out/
+exception/build
+exception/.gradle
+fileUpload/build
+fileUpload/.gradle
