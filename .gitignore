@@ -4,3 +4,5 @@ exception/build
 exception/.gradle
 fileUpload/build
 fileUpload/.gradle
+jpa-basic/.idea/
+jpa-basic/.idea
