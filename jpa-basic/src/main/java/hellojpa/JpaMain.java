@@ -9,7 +9,8 @@ import java.util.List;
 public class JpaMain {
 
     public static void main(String[] args) {
-        // 로딩 시점에 딱 하나만 만들어 놓는다.
+        // 로딩 시점에 딱 하나만 만들어 놓는다. 데이터 베이스 당 한개씩 묶여서 돌아간다.
+        // persistenceUnitName은 xml 파일에서 읽어온다.
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
         // DB 커넥션을 하나 받았다고 생각하면 된다. 요청이 오면 썻다가 닫았다가.
         // 쓰레드간에 공유 X(사용하고 버려야 한다.)
@@ -29,7 +30,7 @@ public class JpaMain {
 
             /* 수정
             Member findMember = em.find(Member.class, 1L);
-            findMember.setName("HelloJPA");
+            findMember.setName("HelloJPA"); // 변경을 감지해서 update 쿼리가 날라감
              */
 
             /* JPQL로 조회 Member 객체를 대상으로 전부 조회 (JPQL은 객체 지향 SQL)*/
@@ -41,7 +42,7 @@ public class JpaMain {
             for (Member member : result) {
                 System.out.println("member = " + member.getName());
             }
-
+            // commit 전 쓰기 지연 SQL 저장소에 저장
             tx.commit();
         } catch (Exception e) {
             tx.rollback();
