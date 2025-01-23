@@ -15,6 +15,12 @@
             <artifactId>hibernate-entitymanager</artifactId>
             <version>5.3.10.Final</version>
         </dependency>
+        <!-- Java 9버전 이상에서 Javax.xml.bind.JAXBException 클래스가 기본적으로 포함되지 않아 의존성 추가 -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
 
         <!-- H2 데이터베이스 -->
         <dependency>
