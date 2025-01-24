@@ -34,14 +34,12 @@ public class JpaMain {
              */
 
             /* JPQL로 조회 Member 객체를 대상으로 전부 조회 (JPQL은 객체 지향 SQL)*/
-            List<Member> result = em.createQuery("SELECT m FROM Member AS m", Member.class)
+            /*List<Member> result = em.createQuery("SELECT m FROM Member AS m", Member.class)
                     .setFirstResult(1) // 1번부터
                     .setMaxResults(10) // 10개 가져와
-                    .getResultList();
+                    .getResultList(); */
 
-            for (Member member : result) {
-                System.out.println("member = " + member.getName());
-            }
+
             // commit 전 쓰기 지연 SQL 저장소에 저장
             tx.commit();
         } catch (Exception e) {
