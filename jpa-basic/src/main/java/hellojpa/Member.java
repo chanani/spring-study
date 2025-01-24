@@ -2,10 +2,9 @@ package hellojpa;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
-@Entity
-// @Table(name = "USER") USER라는 테이블에 저장하고 싶을 때 정의
+@Entity //(name = "Member")
+// @Table(name = "USER", schema= "") USER라는 테이블에 저장하고 싶을 때 정의
 public class Member {
 
     @Id
