@@ -10,15 +10,15 @@
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
             <property name="javax.persistence.jdbc.user" value="sa"/>
             <property name="javax.persistence.jdbc.password" value=""/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:h2:file:/Users/ichanhan/test;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:file:/Users/ichanhan/jpashop;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE"/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/> <!--DB에 맞는 Dialect를 사용하면 됨 -->
             <!-- 옵션 -->
             <property name="hibernate.show_sql" value="true"/> <!-- 쿼리를 보여줌 -->
             <property name="hibernate.format_sql" value="true"/> <!-- 쿼리를 이쁘게 정렬 -->
             <property name="hibernate.use_sql_comments" value="true"/> <!-- 쿼리가 왜 나왔는지 알려줌 -->
             <property name="hibernate.jdbc.batch_size" value="10"/> <!-- 배치 사이즈 -->
-            <!--<property name="hibernate.hbm2ddl.auto" value="create" />--> <!-- DB 자동 스키마 생성-->
-            <property name="hibernate.hbm2ddl.auto" value="validate" /> <!-- 엔티티와 테이블이 정상 매피되었는지 확인 -->
+            <property name="hibernate.hbm2ddl.auto" value="create" /> <!-- DB 자동 스키마 생성-->
+            <!--<property name="hibernate.hbm2ddl.auto" value="validate" /> --><!-- 엔티티와 테이블이 정상 매피되었는지 확인 -->
         </properties>
     </persistence-unit>
 </persistence>
