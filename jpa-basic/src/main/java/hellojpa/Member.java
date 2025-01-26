@@ -1,22 +1,24 @@
 package hellojpa;
 
 import javax.persistence.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "MEMBER_ID")
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "USERNAME")
     private String userName;
 
-    public Member() {
-    }
+//    @Column(name = "TEAM_ID")
+//    private Long teamId;
+
+    @ManyToOne(fetch = FetchType.LAZY) // Member가 N일 경우
+    @JoinColumn(name = "TEAM_ID")
+    private Team team;
 
     public Long getId() {
         return id;
@@ -32,5 +34,13 @@ public class Member {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
     }
 }
