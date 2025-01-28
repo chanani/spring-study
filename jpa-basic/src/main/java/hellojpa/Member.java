@@ -13,12 +13,16 @@ public class Member {
     @Column(name = "USERNAME")
     private String userName;
 
-//    @Column(name = "TEAM_ID")
-//    private Long teamId;
-
     @ManyToOne(fetch = FetchType.LAZY) // Member가 N일 경우
     @JoinColumn(name = "TEAM_ID")
     private Team team;
+
+    @OneToMany
+    @JoinColumn(name = "LOCKER_ID")
+    private Locker locker;
+
+    public Member() {
+    }
 
     public Long getId() {
         return id;
@@ -43,4 +47,5 @@ public class Member {
     public void setTeam(Team team) {
         this.team = team;
     }
+
 }

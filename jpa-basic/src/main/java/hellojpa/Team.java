@@ -7,14 +7,22 @@ import java.util.List;
 @Entity
 public class Team {
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     @Column(name = "TEAM_ID")
     private Long id;
     private String name;
 
     // mappedBy team에 의해 mapping 되었음을 의미(주인울 지정), Owner일 경우 사용 X
+    // 1:N일 경우 N이 Owner(주인)
     @OneToMany(mappedBy = "team")
     private List<Member> members = new ArrayList<>();
+
+    // 양방양일 경우 두 객체에 모두 데이터를 넣기 위해
+    public void addMember(Member member) {
+        member.setTeam(this);
+        members.add(member);
+    }
 
     public Long getId() {
         return id;
@@ -39,4 +47,6 @@ public class Team {
     public void setMembers(List<Member> members) {
         this.members = members;
     }
+
+
 }
