@@ -13,7 +13,7 @@ public class Locker {
 
     private String name;
 
-    @OneToMany(mappedBy = "locker")
+    @OneToMany(mappedBy = "locker") // 일기 전용
     private Member member;
 
 }
