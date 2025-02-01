@@ -1,9 +1,6 @@
 package hellojpa;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 
 @Entity
 public class Locker {
@@ -13,7 +10,7 @@ public class Locker {
 
     private String name;
 
-    @OneToMany(mappedBy = "locker") // 일기 전용
+    @OneToOne(mappedBy = "locker") // 일기 전용
     private Member member;
 
 }

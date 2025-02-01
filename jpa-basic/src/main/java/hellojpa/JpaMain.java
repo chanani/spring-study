@@ -41,7 +41,7 @@ public class JpaMain {
 
 
             // 단방햔 연관 관계
-            Team team = new Team();
+            /*Team team = new Team();
             team.setName("TeamA");
             em.persist(team);
 
@@ -55,12 +55,24 @@ public class JpaMain {
             em.clear();
 
             Member findMember = em.find(Member.class, member.getId());
-
             List<Member> members = findMember.getTeam().getMembers();
-
             for (Member m : members) {
                 System.out.println("m.getUserName() = " + m.getUserName());
-            }
+            } */
+
+            Movie movie = new Movie();
+            movie.setDirector("aaaa");
+            movie.setActor("bbbb");
+            movie.setName("바람과 함꼐 사라지다");
+            movie.setPrice(10000);
+
+            em.persist(movie);
+
+            em.flush();
+            em.clear();
+
+            Movie findMove = em.find(Movie.class, movie.getId());
+            System.out.println("findMove = " + findMove);
 
             // commit 전 쓰기 지연 SQL 저장소에 저장
             tx.commit();
