@@ -1,5 +1,6 @@
 package japbook.japshopp;
 
+import japbook.japshopp.domain.Book;
 import japbook.japshopp.domain.Order;
 import japbook.japshopp.domain.OrderItem;
 
@@ -17,8 +18,11 @@ public class japMain {
         tx.begin();
 
         try {
-            Order order = new Order();
-            order.addOrderItem(new OrderItem());
+            Book book = new Book();
+            book.setName("JPA");
+            book.setAuthor("찬");
+
+            em.persist(book);
 
             tx.commit();
         } catch (Exception e) {
