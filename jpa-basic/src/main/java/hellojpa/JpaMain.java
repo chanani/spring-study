@@ -61,13 +61,27 @@ public class JpaMain {
                 System.out.println("m.getUserName() = " + m.getUserName());
             } */
 
-           Member member = new Member();
+           /*Member member = new Member();
            member.setCreatedBy("kim");
            member.setCreatedDate(LocalDateTime.now());
 
            em.persist(member);
             em.flush();
+            em.clear(); */
+
+            Member member = new Member();
+            member.setUserName("hello");
+
+            em.persist(member);
+
+            em.flush();
             em.clear();
+
+            // Member findMember = em.find(Member.class, member.getId());
+            Member findMember = em.getReference(Member.class, member.getId());
+            System.out.println("findMember.getUserName() = " + findMember.getUserName());
+            System.out.println("findMember.getUserName() = " + findMember.getUserName());
+
 
             // commit 전 쓰기 지연 SQL 저장소에 저장
             tx.commit();

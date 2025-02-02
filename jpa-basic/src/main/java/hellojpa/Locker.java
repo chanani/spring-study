@@ -10,7 +10,7 @@ public class Locker {
 
     private String name;
 
-    @OneToOne(mappedBy = "locker") // 일기 전용
-    private Member member;
+//    @OneToOne(mappedBy = "locker") // 일기 전용
+//    private Member member;
 
 }

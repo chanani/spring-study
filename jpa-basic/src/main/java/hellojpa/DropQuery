@@ -1,0 +1,10 @@
+drop table ALBUM;
+drop table BOOK;
+drop table MOVIE;
+drop table FILEDCOLUMNMAPPING;
+drop table ITEM;
+drop table MEMBERPRODUCT;
+drop table MEMBER;
+drop table PRODUCT;
+drop table TEAM;
+drop table LOCKER;

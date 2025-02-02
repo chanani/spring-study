@@ -1,0 +1,11 @@
+SELECT * FROM ITEM;
+drop table CATEGORY_ITEM;
+drop table CATEGORY;
+drop table ORDERITEM;
+drop table ORDERS;
+drop table ALBUM ;
+drop table  BOOK ;
+drop table MOVIE ;
+drop table DELIVERY;
+drop table ITEM;
+drop table MEMBER;
