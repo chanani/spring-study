@@ -69,19 +69,22 @@ public class JpaMain {
             em.flush();
             em.clear(); */
 
-            Member member = new Member();
-            member.setUserName("hello");
+            Member member1 = new Member();
+            member1.setUserName("hello1");
+            em.persist(member1);
 
-            em.persist(member);
+            Member member2 = new Member();
+            member1.setUserName("hello2");
+            em.persist(member2);
 
             em.flush();
             em.clear();
 
-            // Member findMember = em.find(Member.class, member.getId());
-            Member findMember = em.getReference(Member.class, member.getId());
-            System.out.println("findMember.getUserName() = " + findMember.getUserName());
-            System.out.println("findMember.getUserName() = " + findMember.getUserName());
-
+            Member m1 = em.find(Member.class, member1.getId());
+            // Member m2 = em.find(Member.class, member2.getId());
+            Member m2 = em.getReference(Member.class, member2.getId());
+            // System.out.println("m1 == m2 : " + (m1.getClass() == m2.getClass()));
+            login(m1, m2);
 
             // commit 전 쓰기 지연 SQL 저장소에 저장
             tx.commit();
@@ -91,5 +94,12 @@ public class JpaMain {
             em.close();
         }
         emf.close();
+    }
+
+    // 타입은 instanceof로 비교
+    private static void login(Member m1, Member m2) {
+        System.out.println("m1 == m2 : " + (m1 instanceof Member));
+        System.out.println("m1 == m2 : " + (m2 instanceof Member));
+
     }
 }
