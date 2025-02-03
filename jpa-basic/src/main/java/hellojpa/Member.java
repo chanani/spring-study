@@ -1,8 +1,6 @@
 package hellojpa;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 public class Member extends BaseEntity {
@@ -15,7 +13,8 @@ public class Member extends BaseEntity {
     @Column(name = "USERNAME")
     private String userName;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Member가 N일 경우
+    // @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩 : Proxy 객체를 조회한다. 객체 생성 시점이 아닌 값을 사용할 때 초기화 요청
+    @ManyToOne(fetch = FetchType.EAGER) // 즉시 로딩 : em.find() 사용 시 즉시 DB에 접근해서 값을 조회
     @JoinColumn(name = "TEAM_ID")
     private Team team;
 
