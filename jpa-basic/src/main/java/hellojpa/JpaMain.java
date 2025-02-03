@@ -1,5 +1,7 @@
 package hellojpa;
 
+import org.hibernate.Hibernate;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -69,7 +71,7 @@ public class JpaMain {
             em.flush();
             em.clear(); */
 
-            Member member1 = new Member();
+            /* Member member1 = new Member();
             member1.setUserName("hello1");
             em.persist(member1);
 
@@ -84,12 +86,31 @@ public class JpaMain {
             // Member m2 = em.find(Member.class, member2.getId());
             Member m2 = em.getReference(Member.class, member2.getId());
             // System.out.println("m1 == m2 : " + (m1.getClass() == m2.getClass()));
-            login(m1, m2);
+            login(m1, m2); */
+
+            ////////////////////////////////////////
+            // 준영속 상태일 경우
+            Member member1 = new Member();
+            member1.setUserName("hello1");
+            em.persist(member1);
+
+            Member refMember = em.getReference(Member.class, member1.getId());
+            System.out.println("refMember = " + refMember.getClass());
+
+            em.flush();
+            // em.detach(refMember);
+            em.clear();
+
+            refMember.getUserName(); // 영속성의 도움을 받지 못해 에러 발생
+
+            System.out.println("inLoaded = " + emf.getPersistenceUnitUtil().isLoaded(refMember)); // 프록시 인스턴스의 초기화 여부 확인
+            Hibernate.initialize(refMember); // 강제 초기화
 
             // commit 전 쓰기 지연 SQL 저장소에 저장
             tx.commit();
         } catch (Exception e) {
             tx.rollback();
+            e.printStackTrace();
         } finally {
             em.close();
         }
