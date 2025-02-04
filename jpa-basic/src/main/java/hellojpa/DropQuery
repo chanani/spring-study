@@ -8,3 +8,5 @@ drop table MEMBER;
 drop table PRODUCT;
 drop table TEAM;
 drop table LOCKER;
+drop table Child;
+drop table Parent;

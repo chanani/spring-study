@@ -89,7 +89,7 @@ public class JpaMain {
             login(m1, m2); */
 
             ////////////////////////////////////////
-            // 준영속 상태일 경우
+           /* // 준영속 상태일 경우
             Member member1 = new Member();
             member1.setUserName("hello1");
             em.persist(member1);
@@ -100,16 +100,29 @@ public class JpaMain {
             em.flush();
             // em.detach(refMember);
             em.clear();
-            /*refMember.getUserName(); // 영속성의 도움을 받지 못해 에러 발생
+             refMember.getUserName(); // 영속성의 도움을 받지 못해 에러 발생
             System.out.println("inLoaded = " + emf.getPersistenceUnitUtil().isLoaded(refMember)); // 프록시 인스턴스의 초기화 여부 확인
             Hibernate.initialize(refMember); // 강제 초기화 */
 
             /////////////////////////////////////////
-            // ManyToOne 일 때 즉시 로딩 :
+            /*// ManyToOne 일 때 즉시 로딩 :
             // SQL 통해서 member의 정보를 조회하지만 Member 객체 안에는 team 변수가 EAGER로 설정 되어 있기 때문에 team 정보 조회가 같이 이루어진다.
             // Member 필드의 컬럼은 LAZY로 설정하고 JOIN FETCH를 통해 팀의 정보를 조회할 수 있다.
             List<Member> members = em.createQuery("SELECT m FROM Member m JOIN FETCH m.team", Member.class)
                     .getResultList();
+            */
+
+            ///////////////
+            // 영속성 전이(CASCADE)
+            Child child1 = new Child();
+            Child child2 = new Child();
+
+            Parent parent = new Parent();
+            parent.addChild(child1);
+            parent.addChild(child2);
+
+            em.persist(parent);
+
 
             // commit 전 쓰기 지연 SQL 저장소에 저장
             tx.commit();
