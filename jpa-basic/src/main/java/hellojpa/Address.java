@@ -1,6 +1,7 @@
 package hellojpa;
 
 import javax.persistence.Embeddable;
+import java.util.Objects;
 
 @Embeddable
 public class Address {
@@ -39,5 +40,19 @@ public class Address {
 
     public void setZipcode(String zipcode) {
         this.zipcode = zipcode;
+    }
+
+    // equals Override : 값 타입 비교는 ==이 아닌 equals로 진행해야함(당연한거임)
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Address address = (Address) object;
+        return Objects.equals(city, address.city) && Objects.equals(street, address.street) && Objects.equals(zipcode, address.zipcode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(city, street, zipcode);
     }
 }
