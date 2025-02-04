@@ -114,7 +114,7 @@ public class JpaMain {
 
             ///////////////
             // 영속성 전이(CASCADE)
-            Child child1 = new Child();
+            /*Child child1 = new Child();
             Child child2 = new Child();
 
             Parent parent = new Parent();
@@ -128,7 +128,15 @@ public class JpaMain {
 
             // 고아 객체
             Parent findParent = em.find(Parent.class, parent.getId());
-            findParent.getChildList().remove(0);
+            findParent.getChildList().remove(0);*/
+
+            // 임베디드 타입
+            Member member = new Member();
+            member.setUserName("hello");
+            member.setHomeAddress(new Address("city", "street", "1000"));
+            member.setWorkPeriod(new Period());
+
+            em.persist(member);
 
             // commit 전 쓰기 지연 SQL 저장소에 저장
             tx.commit();
