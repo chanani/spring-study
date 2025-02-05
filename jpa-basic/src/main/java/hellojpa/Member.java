@@ -25,12 +25,15 @@ public class Member {
     @Column(name = "FOOD_NAME")
     private Set<String> favoriteFoods = new HashSet<>();
 
-    @ElementCollection
-    @CollectionTable(name = "ADDRESS", joinColumns =
-    @JoinColumn(name = "MEMEBER_ID")
-    )
-    private List<Address> addressHistory = new ArrayList<>();
+//    @ElementCollection
+//    @CollectionTable(name = "ADDRESS", joinColumns =
+//    @JoinColumn(name = "MEMEBER_ID")
+//    )
+//    private List<Address> addressHistory = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "MEMBER_ID")
+    private List<AddressEntity> addressHistory = new ArrayList<>();
 
     // @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩 : Proxy 객체를 조회한다. 객체 생성 시점이 아닌 값을 사용할 때 초기화 요청
     @ManyToOne(fetch = FetchType.EAGER) // 즉시 로딩 : em.find() 사용 시 즉시 DB에 접근해서 값을 조회
@@ -90,11 +93,11 @@ public class Member {
         this.favoriteFoods = favoriteFoods;
     }
 
-    public List<Address> getAddressHistory() {
+    public List<AddressEntity> getAddressHistory() {
         return addressHistory;
     }
 
-    public void setAddressHistory(List<Address> addressHistory) {
+    public void setAddressHistory(List<AddressEntity> addressHistory) {
         this.addressHistory = addressHistory;
     }
 }

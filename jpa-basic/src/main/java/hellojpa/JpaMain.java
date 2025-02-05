@@ -146,8 +146,8 @@ public class JpaMain {
             member.getFavoriteFoods().add("족발");
             member.getFavoriteFoods().add("피지");
 
-            member.getAddressHistory().add(new Address("old1", "street", "10000"));
-            member.getAddressHistory().add(new Address("old2", "street", "10000"));
+            member.getAddressHistory().add(new AddressEntity("old1", "street", "10000"));
+            member.getAddressHistory().add(new AddressEntity("old2", "street", "10000"));
 
             em.persist(member);
 
@@ -158,7 +158,7 @@ public class JpaMain {
             Member findMember = em.find(Member.class, member.getId());
 
             // 지연 로딩으로 인해 따로 조회해야됨
-            List<Address> addressHistory = findMember.getAddressHistory();
+            //List<Address> addressHistory = findMember.getAddressHistory();
             /* for (Address address : addressHistory) {
                 System.out.println("address.getCity() = " + address.getCity());
             } */
@@ -174,8 +174,8 @@ public class JpaMain {
             findMember.getFavoriteFoods().add("한식");
 
             // 주소 수정
-            findMember.getAddressHistory().remove(new Address("old1", "street", "10000"));
-            findMember.getAddressHistory().add(new Address("newCity1", "street", "10000"));
+//            findMember.getAddressHistory().remove(new Address("old1", "street", "10000"));
+//            findMember.getAddressHistory().add(new Address("newCity1", "street", "10000"));
 
 
 
