@@ -131,12 +131,54 @@ public class JpaMain {
             findParent.getChildList().remove(0);*/
 
             // 임베디드 타입
-            Member member = new Member();
+            /*Member member = new Member();
             member.setUserName("hello");
             member.setHomeAddress(new Address("city", "street", "1000"));
             member.setWorkPeriod(new Period());
 
+            em.persist(member);*/
+
+            Member member = new Member();
+            member.setUserName("member1");
+            member.setHomeAddress(new Address("homeCity", "street", "10000"));
+
+            member.getFavoriteFoods().add("치킨");
+            member.getFavoriteFoods().add("족발");
+            member.getFavoriteFoods().add("피지");
+
+            member.getAddressHistory().add(new Address("old1", "street", "10000"));
+            member.getAddressHistory().add(new Address("old2", "street", "10000"));
+
             em.persist(member);
+
+            em.flush();
+            em.clear();
+
+            System.out.println("=======================");
+            Member findMember = em.find(Member.class, member.getId());
+
+            // 지연 로딩으로 인해 따로 조회해야됨
+            List<Address> addressHistory = findMember.getAddressHistory();
+            /* for (Address address : addressHistory) {
+                System.out.println("address.getCity() = " + address.getCity());
+            } */
+
+            // homeCity -> newCity 로 수정
+            // findMember.getHomeAddress().setCity("newCity"); // 이러면 안됌 사이드 이펙트가 생길 수 있음
+            Address old = findMember.getHomeAddress();
+            // 수정하려면 새로운 인스턴스로 갈아끼워야함
+            findMember.setHomeAddress(new Address("newCity", old.getStreet(), old.getZipcode()));
+
+            // 값 타입 컬렉션 업데이트 (치킨 -> 한식)
+            findMember.getFavoriteFoods().remove("치킨");
+            findMember.getFavoriteFoods().add("한식");
+
+            // 주소 수정
+            findMember.getAddressHistory().remove(new Address("old1", "street", "10000"));
+            findMember.getAddressHistory().add(new Address("newCity1", "street", "10000"));
+
+
+
 
             // commit 전 쓰기 지연 SQL 저장소에 저장
             tx.commit();
