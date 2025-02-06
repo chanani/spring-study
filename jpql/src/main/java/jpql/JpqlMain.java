@@ -18,11 +18,11 @@ public class JpqlMain {
             member.setAge(10);
             em.persist(member);
 
-            Member result = em.createQuery("select m from Member m where m.username = :username", Member.class)
+            /*Member result = em.createQuery("select m from Member m where m.username = :username", Member.class)
                     .setParameter("username", "member1")
                     .getSingleResult();
             System.out.println("singleResult = " + result.getUsername());
-            /*List<Member> resultList = query.getResultList(); // 다중 레코드가 반환될 경우
+            List<Member> resultList = query.getResultList(); // 다중 레코드가 반환될 경우
             for (Member member1 : resultList) {
                 System.out.println("member1 = " + member1);
             }
@@ -31,6 +31,11 @@ public class JpqlMain {
             TypedQuery<String> query2 = em.createQuery("select m.username, m.age from Member m", String.class);
             // 반환 타입이 명확하지 않을 경우
             Query query3 = em.createQuery("select m.username, m.age from Member m");*/
+
+            /////////// 프로젝션 : SELECT 절에 조회할 대상을 지정하는 것 - 영속성 컨텍스트에서 관리된다.
+            List<MemberDTO> result = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)
+                    .getResultList();
+
 
 
             tx.commit();
