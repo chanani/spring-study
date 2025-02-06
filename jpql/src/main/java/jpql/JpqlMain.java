@@ -56,9 +56,11 @@ public class JpqlMain {
             } */
 
             /////////// 조인
-            String query = "select m from Member m left join m.team t on t.name = 'A'";
+            /*String query = "select m from Member m left join m.team t on t.name = 'A'";
             List<Member> result = em.createQuery(query, Member.class)
-                    .getResultList();
+                    .getResultList(); */
+
+
 
             tx.commit();
         } catch (Exception e) {
