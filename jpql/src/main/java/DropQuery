@@ -1,0 +1,4 @@
+drop table ORDERS;
+drop table PRODUCT;
+drop table MEMBER;
+drop table TEAM;
