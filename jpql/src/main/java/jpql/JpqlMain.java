@@ -1,9 +1,7 @@
 package jpql;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
+import javax.persistence.*;
+import java.util.List;
 
 public class JpqlMain {
 
@@ -15,7 +13,24 @@ public class JpqlMain {
 
         try {
 
+            Member member = new Member();
+            member.setUsername("member1");
+            member.setAge(10);
+            em.persist(member);
 
+            Member result = em.createQuery("select m from Member m where m.username = :username", Member.class)
+                    .setParameter("username", "member1")
+                    .getSingleResult();
+            System.out.println("singleResult = " + result.getUsername());
+            /*List<Member> resultList = query.getResultList(); // 다중 레코드가 반환될 경우
+            for (Member member1 : resultList) {
+                System.out.println("member1 = " + member1);
+            }
+            Member singleResult = query.getSingleResult(); // 정확하게 1개의 레코드만 반환될 경우
+
+            TypedQuery<String> query2 = em.createQuery("select m.username, m.age from Member m", String.class);
+            // 반환 타입이 명확하지 않을 경우
+            Query query3 = em.createQuery("select m.username, m.age from Member m");*/
 
 
             tx.commit();
