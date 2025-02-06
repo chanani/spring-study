@@ -12,11 +12,13 @@ public class JpqlMain {
         tx.begin();
 
         try {
+            for (int i = 0; i < 50; i++) {
+                Member member = new Member();
+                member.setUsername("member" + i);
+                member.setAge(i);
+                em.persist(member);
+            }
 
-            Member member = new Member();
-            member.setUsername("member1");
-            member.setAge(10);
-            em.persist(member);
 
             /*Member result = em.createQuery("select m from Member m where m.username = :username", Member.class)
                     .setParameter("username", "member1")
@@ -33,10 +35,17 @@ public class JpqlMain {
             Query query3 = em.createQuery("select m.username, m.age from Member m");*/
 
             /////////// 프로젝션 : SELECT 절에 조회할 대상을 지정하는 것 - 영속성 컨텍스트에서 관리된다.
-            List<MemberDTO> result = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)
+            /*List<MemberDTO> result = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)
+                    .getResultList(); */
+
+            /////////// 페이징
+            List<Member> result = em.createQuery("select m from Member m order by m.age desc", Member.class)
+                    .setFirstResult(1)
+                    .setMaxResults(10)
                     .getResultList();
-
-
+            for (Member member1 : result) {
+                System.out.println("member1.toString() = " + member1.toString());
+            }
 
             tx.commit();
         } catch (Exception e) {
