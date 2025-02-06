@@ -63,7 +63,7 @@ public class JpqlMain {
 
             //////////// JPQL 타입
             // ENUM
-            String query = "select m.username, 'HELLO', TRUE from Member m " +
+            /*String query = "select m.username, 'HELLO', TRUE from Member m " +
                     // "where m.type = jpql.MemberType.ADMIN";
                     "where m.type = :userType";
             List<Object[]> result = em.createQuery(query)
@@ -73,7 +73,31 @@ public class JpqlMain {
                 System.out.println("objects = " + objects[0]);
                 System.out.println("objects = " + objects[1]);
                 System.out.println("objects = " + objects[2]);
+            }*/
+
+            //////////// 조건식
+            // CASE 식
+            /*String query = "select " +
+                    "case when m.age <= 10 then '학생요금'" +
+                    "     when m.age >= 60 then '경로요금'" +
+                    "     else '일반요금'" +
+                    "end AS price " +
+                    "from Member m";
+
+            List<String> result = em.createQuery(query, String.class)
+                    .getResultList();
+            for (String s : result) {
+                System.out.println("s = " + s);
+            } */
+
+            // coalesce
+            String query = "select coalesce(m.username, '이름 없는 회원') from Member m";
+            List<String> result = em.createQuery(query, String.class)
+                    .getResultList();
+            for (String s : result) {
+                System.out.println("s = " + s);
             }
+
 
             tx.commit();
         } catch (Exception e) {
