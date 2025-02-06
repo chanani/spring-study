@@ -20,6 +20,7 @@ public class JpqlMain {
             Member member = new Member();
             member.setUsername("member1");
             member.setAge(10);
+            member.setType(MemberType.ADMIN);
 
             member.setTeam(team);
 
@@ -60,7 +61,19 @@ public class JpqlMain {
             List<Member> result = em.createQuery(query, Member.class)
                     .getResultList(); */
 
-
+            //////////// JPQL 타입
+            // ENUM
+            String query = "select m.username, 'HELLO', TRUE from Member m " +
+                    // "where m.type = jpql.MemberType.ADMIN";
+                    "where m.type = :userType";
+            List<Object[]> result = em.createQuery(query)
+                    .setParameter("userType", MemberType.ADMIN)
+                    .getResultList();
+            for (Object[] objects : result) {
+                System.out.println("objects = " + objects[0]);
+                System.out.println("objects = " + objects[1]);
+                System.out.println("objects = " + objects[2]);
+            }
 
             tx.commit();
         } catch (Exception e) {
