@@ -91,12 +91,26 @@ public class JpqlMain {
             } */
 
             // coalesce
-            String query = "select coalesce(m.username, '이름 없는 회원') from Member m";
+            /*String query = "select coalesce(m.username, '이름 없는 회원') from Member m";
+            List<String> result = em.createQuery(query, String.class)
+                    .getResultList();
+            for (String s : result) {
+                System.out.println("s = " + s);
+            } */
+
+            //////////// 함수
+            // String query = "select substring(m.username, 2, 3) from Member m";
+            // String query = "select locate('de', 'abcdefg') from Member m";
+            // String query = "select size(t.members) from Team t";
+
+            // 사용자 정의함수
+            String query = "select group_concat(m.username) from Member m";
             List<String> result = em.createQuery(query, String.class)
                     .getResultList();
             for (String s : result) {
                 System.out.println("s = " + s);
             }
+
 
 
             tx.commit();
