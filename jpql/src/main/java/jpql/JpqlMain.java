@@ -104,12 +104,21 @@ public class JpqlMain {
             // String query = "select size(t.members) from Team t";
 
             // 사용자 정의함수
-            String query = "select group_concat(m.username) from Member m";
+           /* String query = "select group_concat(m.username) from Member m";
             List<String> result = em.createQuery(query, String.class)
                     .getResultList();
             for (String s : result) {
                 System.out.println("s = " + s);
+            }*/
+
+            //////////// 경로 표현식
+            String query = "select m.team from Member m";
+            List<Team> result = em.createQuery(query, Team.class)
+                    .getResultList();
+            for (Team s : result) {
+                System.out.println("s = " + s);
             }
+
 
 
 
