@@ -180,13 +180,18 @@ public class JpqlMain {
             } */
 
             //////////// Named 쿼리 : Entity or XML에 미리 작성
-            List<Member> result = em.createNamedQuery("Member.findByUsername", Member.class)
+            /* List<Member> result = em.createNamedQuery("Member.findByUsername", Member.class)
                     .setParameter("username", "회원1")
                     .getResultList();
             for (Member member : result) {
                 System.out.println("member = " + member);
-            }
+            } */
 
+            //////////// 벌크 연산 -> 벌크 연상 후 영속성 컨텍스 초기화 또는 벌크 연산을 먼저 실행
+            int resultCount = em.createQuery("update Member m set m.age = 20")
+                    .executeUpdate();
+
+            System.out.println("resultCount = " + resultCount);
 
             tx.commit();
         } catch (Exception e) {
