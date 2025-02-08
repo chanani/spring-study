@@ -151,7 +151,7 @@ public class JpqlMain {
             } */
 
             // M : 1 페치 조인
-            String query = "select distinct t from Team t join fetch t.members";
+            /* String query = "select distinct t from Team t join fetch t.members";
             List<Team> result = em.createQuery(query, Team.class)
                     .getResultList();
             for (Team team : result) {
@@ -159,7 +159,27 @@ public class JpqlMain {
                 for (Member member : team.getMembers()) {
                     System.out.println("-> member = " + member);
                 }
+            } */
+
+            //////////// 엔티티 직접 사용 : 엔티티를 직접 사용하면 해당 엔티티의 PK로 젹용
+            /* String query = "select m from Member m where m = :member";
+            List<Member> result = em.createQuery(query, Member.class)
+                    .setParameter("member", member1)
+                    .getResultList();
+            for (Member member : result) {
+                System.out.println("member = " + member.getUsername() + ", " + member.getTeam().getName());
+            } */
+
+            // 외래 키 값
+            String query = "select m from Member m where m.team = :team";
+            List<Member> result = em.createQuery(query, Member.class)
+                    .setParameter("team", teamA)
+                    .getResultList();
+            for (Member member : result) {
+                System.out.println("member = " + member.getUsername() + ", " + member.getTeam().getName());
             }
+
+
 
             tx.commit();
         } catch (Exception e) {
