@@ -12,11 +12,11 @@ public class JpqlMain {
         tx.begin();
 
         try {
-            Team teamA= new Team();
+            Team teamA = new Team();
             teamA.setName("팀A");
             em.persist(teamA);
 
-            Team teamB= new Team();
+            Team teamB = new Team();
             teamB.setName("팀B");
             em.persist(teamB);
 
@@ -171,14 +171,21 @@ public class JpqlMain {
             } */
 
             // 외래 키 값
-            String query = "select m from Member m where m.team = :team";
+            /* String query = "select m from Member m where m.team = :team";
             List<Member> result = em.createQuery(query, Member.class)
                     .setParameter("team", teamA)
                     .getResultList();
             for (Member member : result) {
                 System.out.println("member = " + member.getUsername() + ", " + member.getTeam().getName());
-            }
+            } */
 
+            //////////// Named 쿼리 : Entity or XML에 미리 작성
+            List<Member> result = em.createNamedQuery("Member.findByUsername", Member.class)
+                    .setParameter("username", "회원1")
+                    .getResultList();
+            for (Member member : result) {
+                System.out.println("member = " + member);
+            }
 
 
             tx.commit();
