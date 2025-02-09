@@ -41,6 +41,7 @@ dependencies {
 	}
 
 	// JPA 파라미터 있는 쿼리 콘솔에 기록
+	// 참고 : https://github.com/gavlyukovskiy/spring-boot-data-source-decorator?tab=readme-ov-file
 	implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.10.0")
 }
 
