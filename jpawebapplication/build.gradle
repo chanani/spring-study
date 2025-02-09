@@ -39,6 +39,9 @@ dependencies {
 	testImplementation("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "org.hamcrest", module: "hamcrest-core"
 	}
+
+	// JPA 파라미터 있는 쿼리 콘솔에 기록
+	implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.10.0")
 }
 
 tasks.named('test') {
