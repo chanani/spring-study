@@ -1,17 +1,18 @@
 package jpabook.jpashop.domain.repository;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jpabook.jpashop.domain.Member;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
+@RequiredArgsConstructor
 public class MemberRepository {
 
-    @PersistenceContext
-    public EntityManager em;
+    // @PersistenceContext // RequiredArgsConstructor로 인해 생략 가능 final 필수
+    public final EntityManager em;
 
     // 회원 정보 등록
     public void save(Member member) {
