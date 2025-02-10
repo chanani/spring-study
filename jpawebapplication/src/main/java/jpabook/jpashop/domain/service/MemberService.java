@@ -2,9 +2,7 @@ package jpabook.jpashop.domain.service;
 
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.repository.MemberRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,7 +11,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true) // JPA에서 조회에 넣으면 성능이 최적화 됨
 @RequiredArgsConstructor
-public class MemberService {
+public class MemberService { // 테스트 코드 만드는 단축키(shift + commend + T)
 
     private final MemberRepository memberRepository;
 
