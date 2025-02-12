@@ -34,6 +34,7 @@ public class OrderRepository {
 //                .setParameter("name", orderSearch.getMemberName())
 //                .setMaxResults(1000)
 //                .getResultList();
+
         // JPA Criteria
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Order> cq = cb.createQuery(Order.class);
