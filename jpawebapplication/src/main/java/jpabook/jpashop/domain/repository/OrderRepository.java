@@ -44,13 +44,13 @@ public class OrderRepository {
         List<Predicate> criteria = new ArrayList<>();
 
         // 주문 상태 검색
-        if(orderSearch.getOrderStatus() != null){
+        if (orderSearch.getOrderStatus() != null) {
             Predicate status = cb.equal(o.get("status"), orderSearch.getOrderStatus());
             criteria.add(status);
         }
 
         // 회원이름 검색
-        if(StringUtils.hasText(orderSearch.getMemberName())){
+        if (StringUtils.hasText(orderSearch.getMemberName())) {
             Predicate name = cb.like(m.get("name"), "%" + orderSearch.getMemberName() + "%");
             criteria.add(name);
         }
@@ -59,5 +59,14 @@ public class OrderRepository {
         TypedQuery<Order> query = em.createQuery(cq).setMaxResults(10000);
         return query.getResultList();
 
+    }
+
+    // 주문 조회 fetch join
+    public List<Order> findAllWithMemberDelivery() {
+        return em.createQuery(
+                "select o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch  o.delivery d", Order.class
+        ).getResultList();
     }
 }
