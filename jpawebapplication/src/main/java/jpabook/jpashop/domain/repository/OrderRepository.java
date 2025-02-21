@@ -1,9 +1,9 @@
 package jpabook.jpashop.domain.repository;
 
-import ch.qos.logback.core.util.StringUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import jpabook.jpashop.api.OrderSimpleApiController;
 import jpabook.jpashop.domain.Order;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -69,4 +69,6 @@ public class OrderRepository {
                         " join fetch  o.delivery d", Order.class
         ).getResultList();
     }
+
+
 }
