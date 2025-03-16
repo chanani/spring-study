@@ -2,7 +2,7 @@ package jpabook.jpashop.api;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
-import jpabook.jpashop.domain.service.MemberService;
+import jpabook.jpashop.service.MemberService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

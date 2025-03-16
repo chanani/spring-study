@@ -1,4 +1,4 @@
-package jpabook.jpashop.domain.repository.order.query;
+package jpabook.jpashop.repository.order.query;
 
 import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.OrderStatus;

@@ -4,12 +4,14 @@ import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.OrderStatus;
-import jpabook.jpashop.domain.repository.OrderRepository;
-import jpabook.jpashop.domain.repository.OrderSearch;
-import jpabook.jpashop.domain.repository.order.query.OrderFlatDto;
-import jpabook.jpashop.domain.repository.order.query.OrderItemQueryDto;
-import jpabook.jpashop.domain.repository.order.query.OrderQueryDto;
-import jpabook.jpashop.domain.repository.order.query.OrderQueryRepository;
+import jpabook.jpashop.repository.OrderRepository;
+import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.query.OrderFlatDto;
+import jpabook.jpashop.repository.order.query.OrderItemQueryDto;
+import jpabook.jpashop.repository.order.query.OrderQueryDto;
+import jpabook.jpashop.repository.order.query.OrderQueryRepository;
+import jpabook.jpashop.service.query.OrderDto;
+import jpabook.jpashop.service.query.OrderQueryService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,13 +54,16 @@ public class OrderApiController {
         return result;
     }
 
+    private OrderQueryService orderQueryService;
+
     @GetMapping("/api/v3/orders")
-    public List<OrderDto> ordersV3() {
-        List<Order> orders = orderRepository.findAllWithItem();
-        List<OrderDto> result = orders.stream()
-                .map(o -> new OrderDto(o))
-                .collect(Collectors.toList());
-        return result;
+    public List<jpabook.jpashop.service.query.OrderDto> ordersV3() {
+        return orderQueryService.ordersV3();
+//        List<Order> orders = orderRepository.findAllWithItem();
+//        List<OrderDto> result = orders.stream()
+//                .map(o -> new OrderDto(o))
+//                .collect(Collectors.toList());
+//        return result;
     }
 
     // 컬렉션 페이징
