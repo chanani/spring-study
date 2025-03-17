@@ -11,3 +11,4 @@ jpql/.idea
 jpql/target
 jpawebapplication/build
 jpawebapplication/.gradle
+jpawebapplication/src/main/generated
