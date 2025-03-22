@@ -35,4 +35,9 @@ public class Member {
         this.team = team;
         team.getMembers().add(this);
     }
+
+    public Member(String username, int age) {
+        this.username = username;
+        this.age = age;
+    }
 }
