@@ -11,9 +11,9 @@ import study.datajpa.entity.Team;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -142,5 +142,24 @@ class MemberRepositoryTest {
         for (Member member : result) {
             System.out.println("member = " + member);
         }
+    }
+
+    @Test
+    public void returnType(){
+        Member m1 = new Member("AAA",10);
+        Member m2 = new Member("BBB",20);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        // 컬렉션은 값이 없더라고 null이 반환되지 않음을 보장
+        List<Member> Member = memberRepository.findListByUsername("asd");
+        System.out.println("Member.size() = " + Member.size());
+
+        // 단건일 경우 null
+        Member findMember = memberRepository.findMemberByUsername("asd");
+        System.out.println("findMember = " + findMember);
+
+        Optional<Member> optionalMember = memberRepository.findOptionalByUsername("asd");
+        System.out.println("optionalMember = " + optionalMember);
     }
 }
