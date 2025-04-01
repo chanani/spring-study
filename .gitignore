@@ -14,3 +14,6 @@ jpawebapplication/.gradle
 jpawebapplication/src/main/generated
 data-jpa/.idea
 data-jpa/src/main/generated
+querydsl/.idea
+querydsl/build
+querydsl/.gradle
