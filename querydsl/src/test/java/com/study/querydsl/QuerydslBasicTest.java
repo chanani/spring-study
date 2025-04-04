@@ -1,5 +1,6 @@
 package com.study.querydsl;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
@@ -586,6 +587,7 @@ public class QuerydslBasicTest {
         }
     }
 
+    // Dto가 Querydsl에 의존하게 된다.
     @Test
     public void findDtoByQueryProjection() {
         List<MemberDto> result = queryFactory
@@ -598,4 +600,33 @@ public class QuerydslBasicTest {
         }
     }
 
+    // 동적쿼리
+    @Test
+    public void dynamicQuery_BooleanBuilder(){
+        String usernameParam = "member1";;
+        Integer ageParam = null;
+
+        List<Member> result = searchMember1(usernameParam, ageParam);
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    // 동적쿼리 : BooleanBuilder
+    private List<Member> searchMember1(String usernameCond, Integer ageCond) {
+
+        BooleanBuilder builder = new BooleanBuilder(); // 초기 값을 넣을 수 있음
+        if(usernameCond != null) {
+            builder.and(member.username.eq(usernameCond));
+        }
+
+        if(ageCond != null) {
+            builder.and(member.age.eq(ageCond));
+        }
+
+        return queryFactory
+                .selectFrom(member)
+                .where(builder)
+                .fetch();
+    }
+
+    // 동적쿼리 : Where
 }
