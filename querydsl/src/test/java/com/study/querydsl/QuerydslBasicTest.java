@@ -5,7 +5,9 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -165,6 +167,7 @@ public class QuerydslBasicTest {
      * 2. 회원 이름 올림 차순
      * 단 2에서 회원 이름이 없으면 마지막에 출력(nulls last)
      */
+    // sort : 정렬
     @Test
     public void sort() {
         em.persist(new Member(null, 100));
@@ -186,6 +189,7 @@ public class QuerydslBasicTest {
         assertThat(memberNull.getUsername()).isNull();
     }
 
+    // 페이징
     @Test
     public void paging1() {
         List<Member> result = queryFactory
@@ -197,6 +201,7 @@ public class QuerydslBasicTest {
         assertThat(result.size()).isEqualTo(2);
     }
 
+    // 페이징
     @Test
     public void paging2() {
         QueryResults<Member> results = queryFactory
@@ -212,6 +217,7 @@ public class QuerydslBasicTest {
         assertThat(results.getResults().size()).isEqualTo(2);
     }
 
+    // 집계함수
     @Test
     public void aggregation() {
         List<Tuple> result = queryFactory
@@ -238,6 +244,7 @@ public class QuerydslBasicTest {
     /**
      * 팀의 이름과 각 팀의 평귝 연령을 구해라.
      */
+    // group by : 그룹바이
     @Test
     public void group() throws Exception {
         List<Tuple> result = queryFactory
@@ -336,6 +343,7 @@ public class QuerydslBasicTest {
     @PersistenceUnit
     EntityManagerFactory emf;
 
+    // fetch join - 패치 조인
     @Test
     public void fetchJoinNo() {
         em.flush();
@@ -350,6 +358,7 @@ public class QuerydslBasicTest {
         assertThat(loaded).as("페치 조인 미적용").isFalse();
     }
 
+    // fetch join - 패치 조인
     @Test
     public void fetchJoinUse() {
         em.flush();
@@ -368,6 +377,7 @@ public class QuerydslBasicTest {
     /**
      * 나이가 가장 많은 회원 조회
      */
+    // 서브쿼리
     @Test
     public void subQuery() {
         QMember memberSub = new QMember("memberSub");
@@ -386,6 +396,7 @@ public class QuerydslBasicTest {
     /**
      * 나이가 가장 평균 이상인 회원
      */
+    // 서브쿼리
     @Test
     public void subQueryGoe() {
         QMember memberSub = new QMember("memberSub");
@@ -401,6 +412,7 @@ public class QuerydslBasicTest {
                 .containsExactly(30, 40);
     }
 
+    // 서브쿼리 in절
     @Test
     public void subQueryIn() {
         QMember memberSub = new QMember("memberSub");
@@ -417,6 +429,7 @@ public class QuerydslBasicTest {
                 .containsExactly(20, 30, 40);
     }
 
+    // 서브쿼리
     @Test
     public void selectSubQuery() {
         QMember memberSub = new QMember("memberSub");
@@ -432,6 +445,7 @@ public class QuerydslBasicTest {
         }
     }
 
+    // Case 문법
     @Test
     public void basicCase() {
         List<String> result = queryFactory
@@ -446,6 +460,7 @@ public class QuerydslBasicTest {
         }
     }
 
+    // Case 문법
     @Test
     public void complexCase() {
         List<String> result = queryFactory
@@ -461,6 +476,7 @@ public class QuerydslBasicTest {
         }
     }
 
+    // 상수 사용
     @Test
     public void constant() {
         List<Tuple> result = queryFactory
@@ -499,6 +515,7 @@ public class QuerydslBasicTest {
         }
     }
 
+    // 프로젝션 - Tuple : 값이 여러개일 때
     @Test
     public void tupleProjection() {
         List<Tuple> result = queryFactory
@@ -526,6 +543,7 @@ public class QuerydslBasicTest {
         }
     }
 
+    // DTO(필드명과 일치, setter)로 직접 반환
     @Test
     public void findDtoBySetter() {
         List<MemberDto> result = queryFactory
@@ -540,6 +558,7 @@ public class QuerydslBasicTest {
         }
     }
 
+    // DTO(필드)로 직접 반환
     @Test
     public void findDtoByField() {
         List<MemberDto> result = queryFactory
@@ -554,6 +573,7 @@ public class QuerydslBasicTest {
         }
     }
 
+    // DTO(생성자)로 직접 반환
     @Test
     public void findDtoByConstructor() {
         List<MemberDto> result = queryFactory
@@ -600,25 +620,24 @@ public class QuerydslBasicTest {
         }
     }
 
-    // 동적쿼리
+    // 동적쿼리 : BooleanBuilder
     @Test
-    public void dynamicQuery_BooleanBuilder(){
-        String usernameParam = "member1";;
+    public void dynamicQuery_BooleanBuilder() {
+        String usernameParam = "member1";
         Integer ageParam = null;
 
         List<Member> result = searchMember1(usernameParam, ageParam);
         assertThat(result.size()).isEqualTo(1);
     }
 
-    // 동적쿼리 : BooleanBuilder
     private List<Member> searchMember1(String usernameCond, Integer ageCond) {
 
         BooleanBuilder builder = new BooleanBuilder(); // 초기 값을 넣을 수 있음
-        if(usernameCond != null) {
+        if (usernameCond != null) {
             builder.and(member.username.eq(usernameCond));
         }
 
-        if(ageCond != null) {
+        if (ageCond != null) {
             builder.and(member.age.eq(ageCond));
         }
 
@@ -629,4 +648,31 @@ public class QuerydslBasicTest {
     }
 
     // 동적쿼리 : Where
+    @Test
+    public void dynamicQuery_WhereParam() {
+        String usernameParam = "member1";
+        Integer ageParam = 10;
+
+        List<Member> result = searchMember2(usernameParam, ageParam);
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    private List<Member> searchMember2(String usernameCond, Integer ageCond) {
+        return queryFactory
+                .selectFrom(member)
+                .where(usernameEq(usernameCond), ageEq(ageCond))
+                .fetch();
+    }
+
+    private BooleanExpression usernameEq(String usernameCond) {
+        return usernameCond != null ? member.username.eq(usernameCond) : null;
+    }
+
+    private BooleanExpression ageEq(Integer ageCond) {
+        return ageCond != null ? member.age.eq(ageCond) : null;
+    }
+
+    private Predicate allEq(String usernameCond, Integer ageCond) {
+        return usernameEq(usernameCond).and(ageEq(ageCond));
+    }
 }
