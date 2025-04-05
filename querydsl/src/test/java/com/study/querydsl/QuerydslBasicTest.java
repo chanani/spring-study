@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -55,7 +56,6 @@ public class QuerydslBasicTest {
 
         Member member1 = new Member("member1", 10, teamA);
         Member member2 = new Member("member2", 20, teamA);
-
         Member member3 = new Member("member3", 30, teamB);
         Member member4 = new Member("member4", 40, teamB);
         em.persist(member1);
@@ -674,5 +674,39 @@ public class QuerydslBasicTest {
 
     private Predicate allEq(String usernameCond, Integer ageCond) {
         return usernameEq(usernameCond).and(ageEq(ageCond));
+    }
+
+    // bulk 연산(update)
+    @Test
+    public void bulkUpdate() {
+        // member1 - 10 -> 비회원
+        // member2 - 20 -> 유지
+        // member3 - 30 -> 유지
+        // member4 - 40 -> 유지
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(20))
+                .execute();
+        em.flush();
+        em.clear();
+    }
+
+    // bulk 연산(update : 더하기, 빼기, 곱하기)
+    @Test
+    public void bulkAdd()  {
+        queryFactory
+                .update(member)
+                .set(member.age, member.age.add(1)) // 곱하기 : multiply
+                .execute();
+    }
+
+    // bulk 연산(delete)
+    @Test
+    public void bulkDelete() {
+        long count = queryFactory
+                .delete(member)
+                .where(member.age.gt(18))
+                .execute();
     }
 }
