@@ -1,7 +1,9 @@
 package com.study.querydsl.repository;
 
+import com.querydsl.core.QueryFactory;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.study.querydsl.dto.MemberSearchCondition;
@@ -12,6 +14,7 @@ import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
@@ -20,16 +23,39 @@ import static com.study.querydsl.entity.QMember.member;
 import static com.study.querydsl.entity.QTeam.team;
 import static org.springframework.util.StringUtils.hasText;
 
-public class MemberRepositoryImpl implements MemberRepositoryCustom {
-
-    private final JPAQueryFactory queryFactory;
-
-    public MemberRepositoryImpl(EntityManager em) {
-        this.queryFactory = new JPAQueryFactory(em);
+public class MemberRepositoryImpl extends QuerydslRepositorySupport implements MemberRepositoryCustom {
+    public MemberRepositoryImpl() {
+        super(Member.class);
     }
+
+//    private final JPAQueryFactory queryFactory;
+//
+//    public MemberRepositoryImpl(EntityManager em) {
+//        this.queryFactory = new JPAQueryFactory(em);
+//    }
+
 
     @Override
     public List<MemberTeamDto> search(MemberSearchCondition condition) {
+        EntityManager entityManager = getEntityManager();
+        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+        // QuerydslRepositorySupport 사용
+        from(member)
+                .leftJoin(member.team, team)
+                .where(
+                        usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe())
+                )
+                .select(new QMemberTeamDto(
+                        member.id.as("memberId"),
+                        member.username,
+                        member.age,
+                        team.id.as("teamId"),
+                        team.name.as("teamName")))
+                .fetch();
+
         return queryFactory
                 .select(new QMemberTeamDto(
                         member.id.as("memberId"),
@@ -51,6 +77,9 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
     @Override
     public Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable) {
+        EntityManager entityManager = getEntityManager();
+        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+
         QueryResults<MemberTeamDto> results = queryFactory
                 .select(new QMemberTeamDto(
                         member.id.as("memberId"),
@@ -76,8 +105,39 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return new PageImpl<>(content, pageable, total);
     }
 
+
+    // getQuerydsl().applyPagination로 페이징을 편하게 할 수 있으나 sort는 적용되지 않는다.
+    public Page<MemberTeamDto> searchPageSimple2(MemberSearchCondition condition, Pageable pageable) {
+
+        JPQLQuery<MemberTeamDto> jpaQuery = from(member)
+                .leftJoin(member.team, team)
+                .where(
+                        usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe())
+                )
+                .select(new QMemberTeamDto(
+                        member.id.as("memberId"),
+                        member.username,
+                        member.age,
+                        team.id.as("teamId"),
+                        team.name.as("teamName")
+                ));
+
+        JPQLQuery<MemberTeamDto> query = getQuerydsl().applyPagination(pageable, jpaQuery);
+        QueryResults<MemberTeamDto> results = query.fetchResults();
+
+        List<MemberTeamDto> content = results.getResults();
+        long total = results.getTotal();
+
+        return new PageImpl<>(content, pageable, total);
+    }
+
     @Override
     public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable) {
+        EntityManager entityManager = getEntityManager();
+        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
         List<MemberTeamDto> content = queryFactory
                 .select(new QMemberTeamDto(
                         member.id.as("memberId"),
