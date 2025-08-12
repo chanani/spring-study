@@ -19,6 +19,8 @@ public class CrawlingService {
 
     private final String instagramUrl = "https://www.instagram.com/aespa_official/";
     private final String xUrl = "https://x.com/aespa_official";
+    private final String tiktokUrl = "https://www.tiktok.com/@aespa_official";
+
 
     public void instagramFeedCrawling() throws Exception {
         ChromeOptions options = new ChromeOptions();
@@ -38,11 +40,12 @@ public class CrawlingService {
                                 By.cssSelector("button[id*='accept'], button[aria-label*='Accept']")
                         ));
                 consent.click();
-            } catch (TimeoutException ignore) {}
+            } catch (TimeoutException ignore) {
+            }
 
             // 피드 컨테이너가 렌더될 때까지 대기 (Instagram main grid)
             By feedContainer = By.cssSelector("main article");
-            By feedItems     = By.cssSelector("main article a[role='link'][href*='/p/'], main article a[role='link'][href*='/reel/']");
+            By feedItems = By.cssSelector("main article a[role='link'][href*='/p/'], main article a[role='link'][href*='/reel/']");
             wait.until(ExpectedConditions.presenceOfElementLocated(feedContainer));
 
             // 충분히 스크롤해서 lazy-load된 아이템 로드
@@ -91,7 +94,8 @@ public class CrawlingService {
                         .until(ExpectedConditions.presenceOfElementLocated(
                                 By.cssSelector("button[id*='accept'], button[aria-label*='Accept']")));
                 consent.click();
-            } catch (TimeoutException ignore) {}
+            } catch (TimeoutException ignore) {
+            }
 
             // 프로필 페이지의 OG description 대기
             WebElement og = wait.until(
@@ -126,11 +130,15 @@ public class CrawlingService {
                         .compile("게시물\\s*(\\d[\\d,\\.]*)\\s*(억|백만|만|천)?(?:개)?")
                         .matcher(desc);
 
-                if (mFollowersEn.find()) followersStr = mFollowersEn.group(1) + " " + nullToEmpty(mFollowersEn.group(2));
-                else if (mFollowersKo.find()) followersStr = mFollowersKo.group(1) + " " + nullToEmpty(mFollowersKo.group(2));
+                if (mFollowersEn.find())
+                    followersStr = mFollowersEn.group(1) + " " + nullToEmpty(mFollowersEn.group(2));
+                else if (mFollowersKo.find())
+                    followersStr = mFollowersKo.group(1) + " " + nullToEmpty(mFollowersKo.group(2));
 
-                if (mFollowingEn.find()) followingStr = mFollowingEn.group(1) + " " + nullToEmpty(mFollowingEn.group(2));
-                else if (mFollowingKo.find()) followingStr = mFollowingKo.group(1) + " " + nullToEmpty(mFollowingKo.group(2));
+                if (mFollowingEn.find())
+                    followingStr = mFollowingEn.group(1) + " " + nullToEmpty(mFollowingEn.group(2));
+                else if (mFollowingKo.find())
+                    followingStr = mFollowingKo.group(1) + " " + nullToEmpty(mFollowingKo.group(2));
 
                 if (mPostsEn.find()) postsStr = mPostsEn.group(1) + " " + nullToEmpty(mPostsEn.group(2));
                 else if (mPostsKo.find()) postsStr = mPostsKo.group(1) + " " + nullToEmpty(mPostsKo.group(2));
@@ -152,14 +160,16 @@ public class CrawlingService {
                     WebElement aFollowers = header.findElement(By.cssSelector("a[href$='/followers/'], a[href*='followers']"));
                     long v = extractPreciseCount(aFollowers);
                     if (v > 0) followers = v;
-                } catch (NoSuchElementException ignore) {}
+                } catch (NoSuchElementException ignore) {
+                }
 
                 // 2) 팔로잉: following 링크에서 정확값 읽기
                 try {
                     WebElement aFollowing = header.findElement(By.cssSelector("a[href$='/following/'], a[href*='following']"));
                     long v = extractPreciseCount(aFollowing);
                     if (v > 0) following = v;
-                } catch (NoSuchElementException ignore) {}
+                } catch (NoSuchElementException ignore) {
+                }
 
                 // 3) 게시물: posts li에서 읽기 (링크가 아닐 수 있음)
                 try {
@@ -169,10 +179,14 @@ public class CrawlingService {
                         String t = li.getText().toLowerCase();
                         if (t.contains("post") || t.contains("게시물")) {
                             long v = extractPreciseCount(li);
-                            if (v > 0) { posts = v; break; }
+                            if (v > 0) {
+                                posts = v;
+                                break;
+                            }
                         }
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
             } catch (Exception e) {
                 log.warn("Fallback DOM parse failed", e);
             }
@@ -204,7 +218,8 @@ public class CrawlingService {
                         .until(ExpectedConditions.presenceOfElementLocated(
                                 By.cssSelector("div[role='dialog'] [aria-label*='Close'], button[aria-label*='Close'], button[id*='accept'], button[aria-label*='Accept']")));
                 dialogClose.click();
-            } catch (TimeoutException ignore) {}
+            } catch (TimeoutException ignore) {
+            }
 
             wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("main")));
             // 렌더 지연 보정: 약간 스크롤하며 렌더 유도
@@ -213,38 +228,39 @@ public class CrawlingService {
                     ((JavascriptExecutor) driver).executeScript("window.scrollBy(0, arguments[0]);", 200 * (i + 1));
                     Thread.sleep(300);
                 }
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
 
             long followers = 0L, following = 0L;
 
 
             // ---- 팔로워 ----
             WebElement followersLink = findFirstPresent(driver,
-                // CSS
-                "a[href$='/followers']",
-                "a[href*='/followers?']",
-                "a[role='link'][href*='/followers']",
-                "a[aria-label*='Followers']",
-                "[role='link'][aria-label*='Followers']",
-                "a[aria-label*='팔로워']",
-                "[role='link'][aria-label*='팔로워']",
-                // XPath
-                "//a[contains(@href,'/followers')]",
-                "//*[@role='link' and contains(@href,'/followers')]",
-                "//*[@role='link' and contains(translate(@aria-label,'FOLWERS','folwers'),'followers')]",
-                "//*[@role='link' and contains(@aria-label,'팔로워')]",
-                "//a[.//span[contains(translate(normalize-space(string(.)),'F','f'),'followers')]]",
-                "//*[contains(normalize-space(.), '팔로워')]/ancestor::a[1]"
+                    // CSS
+                    "a[href$='/followers']",
+                    "a[href*='/followers?']",
+                    "a[role='link'][href*='/followers']",
+                    "a[aria-label*='Followers']",
+                    "[role='link'][aria-label*='Followers']",
+                    "a[aria-label*='팔로워']",
+                    "[role='link'][aria-label*='팔로워']",
+                    // XPath
+                    "//a[contains(@href,'/followers')]",
+                    "//*[@role='link' and contains(@href,'/followers')]",
+                    "//*[@role='link' and contains(translate(@aria-label,'FOLWERS','folwers'),'followers')]",
+                    "//*[@role='link' and contains(@aria-label,'팔로워')]",
+                    "//a[.//span[contains(translate(normalize-space(string(.)),'F','f'),'followers')]]",
+                    "//*[contains(normalize-space(.), '팔로워')]/ancestor::a[1]"
             );
             if (followersLink == null) {
                 // JS로 innerText/aria-label 매칭 폴백
                 followersLink = queryByInnerTextJs(driver, "followers", "팔로워");
             }
             if (followersLink != null) {
-                ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView({block:'center'});", followersLink);
+                ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", followersLink);
                 long v = extractPreciseCount(followersLink);
                 if (v == 0) {
-                    String inner = (String)((JavascriptExecutor)driver).executeScript("return arguments[0].innerText;", followersLink);
+                    String inner = (String) ((JavascriptExecutor) driver).executeScript("return arguments[0].innerText;", followersLink);
                     if (inner != null && !inner.isEmpty()) v = extractCountFromText(inner);
                 }
                 if (v == 0) {
@@ -258,16 +274,16 @@ public class CrawlingService {
 
             // ---- 팔로잉 ----
             WebElement followingLink = findFirstPresent(driver,
-                "a[href$='/following']",
-                "a[href*='/following?']",
-                "a[role='link'][href*='/following']",
-                "//a[contains(@href,'/following')]"
+                    "a[href$='/following']",
+                    "a[href*='/following?']",
+                    "a[role='link'][href*='/following']",
+                    "//a[contains(@href,'/following')]"
             );
             if (followingLink != null) {
-                ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView({block:'center'});", followingLink);
+                ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", followingLink);
                 long v = extractPreciseCount(followingLink);
                 if (v == 0) {
-                    String inner = (String)((JavascriptExecutor)driver).executeScript("return arguments[0].innerText;", followingLink);
+                    String inner = (String) ((JavascriptExecutor) driver).executeScript("return arguments[0].innerText;", followingLink);
                     if (inner != null && !inner.isEmpty()) v = extractCountFromText(inner);
                 }
                 if (v == 0) {
@@ -293,8 +309,10 @@ public class CrawlingService {
                             java.util.regex.Matcher mfKo = java.util.regex.Pattern
                                     .compile("팔로워\\s*(\\d[\\d,\\.]*)\\s*(억|백만|만|천)?")
                                     .matcher(desc);
-                            if (mfEn.find()) followers = parseCount(mfEn.group(1) + " " + (mfEn.group(2) == null ? "" : mfEn.group(2)));
-                            else if (mfKo.find()) followers = parseCount(mfKo.group(1) + " " + (mfKo.group(2) == null ? "" : mfKo.group(2)));
+                            if (mfEn.find())
+                                followers = parseCount(mfEn.group(1) + " " + (mfEn.group(2) == null ? "" : mfEn.group(2)));
+                            else if (mfKo.find())
+                                followers = parseCount(mfKo.group(1) + " " + (mfKo.group(2) == null ? "" : mfKo.group(2)));
                         }
                         if (following == 0) {
                             java.util.regex.Matcher mgEn = java.util.regex.Pattern
@@ -303,11 +321,14 @@ public class CrawlingService {
                             java.util.regex.Matcher mgKo = java.util.regex.Pattern
                                     .compile("(?:팔로우|팔로잉)\\s*(\\d[\\d,\\.]*)\\s*(억|백만|만|천)?")
                                     .matcher(desc);
-                            if (mgEn.find()) following = parseCount(mgEn.group(1) + " " + (mgEn.group(2) == null ? "" : mgEn.group(2)));
-                            else if (mgKo.find()) following = parseCount(mgKo.group(1) + " " + (mgKo.group(2) == null ? "" : mgKo.group(2)));
+                            if (mgEn.find())
+                                following = parseCount(mgEn.group(1) + " " + (mgEn.group(2) == null ? "" : mgEn.group(2)));
+                            else if (mgKo.find())
+                                following = parseCount(mgKo.group(1) + " " + (mgKo.group(2) == null ? "" : mgKo.group(2)));
                         }
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
             }
 
             log.info("X profile info => followers={}, following={}", followers, following);
@@ -316,8 +337,210 @@ public class CrawlingService {
         }
     }
 
+    public void tiktokInfo() throws Exception {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--start-maximized");
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        WebDriver driver = new ChromeDriver(options);
+
+        try {
+            driver.get(tiktokUrl);
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+            // (선택) 쿠키/지역 동의 닫기
+            try {
+                WebElement consent = new WebDriverWait(driver, Duration.ofSeconds(5))
+                        .until(ExpectedConditions.presenceOfElementLocated(
+                                By.cssSelector(
+                                        "button[data-e2e='cookie-banner-accept-button'], " +
+                                                "button[id*='accept'], button[aria-label*='Accept'], " +
+                                                "div[role='dialog'] button[aria-label*='Close']"
+                                )));
+                consent.click();
+            } catch (TimeoutException ignore) {
+            }
+
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("main, div[data-e2e='user-page']")));
+
+            // 렌더 지연 보정: 살짝 스크롤
+            try {
+                for (int i = 0; i < 3; i++) {
+                    ((JavascriptExecutor) driver).executeScript("window.scrollBy(0, arguments[0]);", 200 * (i + 1));
+                    Thread.sleep(250);
+                }
+            } catch (InterruptedException ignored) {
+            }
+
+            long followers = 0L;
+            long following = 0L;
+            long likes = 0L;
+
+            // 1) data-e2e 안정 셀렉터
+            try {
+                WebElement followersEl = findFirstPresent(driver,
+                        "[data-e2e='followers-count']",
+                        "strong[data-e2e='followers-count']",
+                        "div[data-e2e='user-stats'] [data-e2e='followers-count']"
+                );
+                if (followersEl != null) {
+                    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", followersEl);
+                    long v = extractPreciseCount(followersEl);
+                    if (v == 0) {
+                        String inner = (String) ((JavascriptExecutor) driver).executeScript("return arguments[0].innerText;", followersEl);
+                        if (inner != null && !inner.isEmpty()) v = extractCountFromText(inner);
+                    }
+                    followers = v;
+                }
+
+                WebElement followingEl = findFirstPresent(driver,
+                        "[data-e2e='following-count']",
+                        "strong[data-e2e='following-count']",
+                        "div[data-e2e='user-stats'] [data-e2e='following-count']"
+                );
+                if (followingEl != null) {
+                    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", followingEl);
+                    long v = extractPreciseCount(followingEl);
+                    if (v == 0) {
+                        String inner = (String) ((JavascriptExecutor) driver).executeScript("return arguments[0].innerText;", followingEl);
+                        if (inner != null && !inner.isEmpty()) v = extractCountFromText(inner);
+                    }
+                    // 3000 이상이면 잘못된 값으로 보고 버림
+                    if (v > 0 && v < 3000) {
+                        following = v;
+                    }
+                }
+
+                // Fallback - JS 검색 시도
+                if (following == 0) {
+                    WebElement el = queryByInnerTextJs(driver, "following", "팔로잉", "팔로우");
+                    if (el != null) {
+                        long v = extractPreciseCount(el);
+                        if (v == 0) {
+                            String inner = (String) ((JavascriptExecutor) driver).executeScript("return arguments[0].innerText;", el);
+                            if (inner != null && !inner.isEmpty()) v = extractCountFromText(inner);
+                        }
+                        // 여기도 숫자 검증
+                        if (v > 0 && v < 3000) {
+                            following = v;
+                        }
+                    }
+                }
+
+                WebElement likesEl = findFirstPresent(driver,
+                        "[data-e2e='likes-count']",
+                        "strong[data-e2e='likes-count']",
+                        "div[data-e2e='user-stats'] [data-e2e='likes-count']"
+                );
+                if (likesEl != null) {
+                    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", likesEl);
+                    long v = extractPreciseCount(likesEl);
+                    if (v == 0) {
+                        String inner = (String) ((JavascriptExecutor) driver).executeScript("return arguments[0].innerText;", likesEl);
+                        if (inner != null && !inner.isEmpty()) v = extractCountFromText(inner);
+                    }
+                    likes = v;
+                }
+            } catch (Exception e) {
+                log.warn("TikTok primary selectors failed", e);
+            }
+
+            // 2) 메타 description 파싱 (예: "X Followers, Y Following, Z Likes")
+            if (followers == 0 || following == 0 || likes == 0) {
+                try {
+                    WebElement meta = driver.findElement(By.cssSelector("head meta[name='description']"));
+                    String desc = meta.getAttribute("content");
+                    if (desc != null) {
+                        // Followers
+                        if (followers == 0) {
+                            java.util.regex.Matcher mfEn = java.util.regex.Pattern
+                                    .compile("(\\d[\\d,\\.]*)\\s*(K|M|B|thousand|million|billion)?\\s*Followers", java.util.regex.Pattern.CASE_INSENSITIVE)
+                                    .matcher(desc);
+                            java.util.regex.Matcher mfKo = java.util.regex.Pattern
+                                    .compile("팔로워\\s*(\\d[\\d,\\.]*)\\s*(억|백만|만|천)?")
+                                    .matcher(desc);
+                            if (mfEn.find())
+                                followers = parseCount(mfEn.group(1) + " " + (mfEn.group(2) == null ? "" : mfEn.group(2)));
+                            else if (mfKo.find())
+                                followers = parseCount(mfKo.group(1) + " " + (mfKo.group(2) == null ? "" : mfKo.group(2)));
+                        }
+                        // Following
+                        if (following == 0) {
+                            java.util.regex.Matcher mgEn = java.util.regex.Pattern
+                                    .compile("(\\d[\\d,\\.]*)\\s*(K|M|B|thousand|million|billion)?\\s*Following", java.util.regex.Pattern.CASE_INSENSITIVE)
+                                    .matcher(desc);
+                            java.util.regex.Matcher mgKo = java.util.regex.Pattern
+                                    .compile("(?:팔로잉|팔로우)\\s*(\\d[\\d,\\.]*)\\s*(억|백만|만|천)?")
+                                    .matcher(desc);
+                            if (mgEn.find())
+                                following = parseCount(mgEn.group(1) + " " + (mgEn.group(2) == null ? "" : mgEn.group(2)));
+                            else if (mgKo.find())
+                                following = parseCount(mgKo.group(1) + " " + (mgKo.group(2) == null ? "" : mgKo.group(2)));
+                        }
+                        // Likes
+                        if (likes == 0) {
+                            java.util.regex.Matcher mlEn = java.util.regex.Pattern
+                                    .compile("(\\d[\\d,\\.]*)\\s*(K|M|B|thousand|million|billion)?\\s*Likes", java.util.regex.Pattern.CASE_INSENSITIVE)
+                                    .matcher(desc);
+                            java.util.regex.Matcher mlKo = java.util.regex.Pattern
+                                    .compile("좋아요\\s*(\\d[\\d,\\.]*)\\s*(억|백만|만|천)?")
+                                    .matcher(desc);
+                            if (mlEn.find())
+                                likes = parseCount(mlEn.group(1) + " " + (mlEn.group(2) == null ? "" : mlEn.group(2)));
+                            else if (mlKo.find())
+                                likes = parseCount(mlKo.group(1) + " " + (mlKo.group(2) == null ? "" : mlKo.group(2)));
+                        }
+                    }
+                } catch (Exception ignore) {
+                }
+            }
+
+            // 3) JS 텍스트 탐색 폴백
+            if (followers == 0) {
+                WebElement el = queryByInnerTextJs(driver, "followers", "팔로워");
+                if (el != null) {
+                    long v = extractPreciseCount(el);
+                    if (v == 0) {
+                        String inner = (String) ((JavascriptExecutor) driver).executeScript("return arguments[0].innerText;", el);
+                        if (inner != null && !inner.isEmpty()) v = extractCountFromText(inner);
+                    }
+                    if (v > 0) followers = v;
+                }
+            }
+            if (following == 0) {
+                WebElement el = queryByInnerTextJs(driver, "following", "팔로잉", "팔로우");
+                if (el != null) {
+                    long v = extractPreciseCount(el);
+                    if (v == 0) {
+                        String inner = (String) ((JavascriptExecutor) driver).executeScript("return arguments[0].innerText;", el);
+                        if (inner != null && !inner.isEmpty()) v = extractCountFromText(inner);
+                    }
+                    if (v > 0) following = v;
+                }
+            }
+            if (likes == 0) {
+                WebElement el = queryByInnerTextJs(driver, "likes", "좋아요");
+                if (el != null) {
+                    long v = extractPreciseCount(el);
+                    if (v == 0) {
+                        String inner = (String) ((JavascriptExecutor) driver).executeScript("return arguments[0].innerText;", el);
+                        if (inner != null && !inner.isEmpty()) v = extractCountFromText(inner);
+                    }
+                    if (v > 0) likes = v;
+                }
+            }
+
+            log.info("TikTok profile info => followers={}, following={}, likes={}", followers, following, likes);
+
+        } finally {
+            driver.quit();
+        }
+    }
+
     // 유틸
-    private String nullToEmpty(String s) { return s == null ? "" : s; }
+    private String nullToEmpty(String s) {
+        return s == null ? "" : s;
+    }
 
     /**
      * "16.08 million", "1.2M", "1,608만", "8천" 등 다양한 표기를 정수로 변환
@@ -418,7 +641,8 @@ public class CrawlingService {
             if (title != null && !title.isEmpty()) {
                 return parseCount(title);
             }
-        } catch (NoSuchElementException ignored) {}
+        } catch (NoSuchElementException ignored) {
+        }
 
         // 2) aria-label 속성 시도 (예: "1,608만명 팔로워")
         try {
@@ -427,7 +651,8 @@ public class CrawlingService {
                 long v = extractCountFromText(aria);
                 if (v > 0) return v;
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         // 3) 최후: 요소의 가시 텍스트에서 숫자 파싱
         try {
@@ -436,7 +661,8 @@ public class CrawlingService {
                 long v = extractCountFromText(text);
                 if (v > 0) return v;
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return 0L;
     }
@@ -457,7 +683,8 @@ public class CrawlingService {
                 if (found != null && !found.isEmpty()) {
                     return found.get(0);
                 }
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+            }
         }
         return null;
     }
@@ -469,18 +696,19 @@ public class CrawlingService {
         try {
             String script =
                     "const needles = Array.from(arguments).map(s => String(s).toLowerCase());" +
-                    "const els = Array.from(document.querySelectorAll('a,[role=\"link\"],div,span'));" +
-                    "for (const el of els) {" +
-                    "  const t = (el.innerText||'').toLowerCase();" +
-                    "  const a = (el.getAttribute('aria-label')||'').toLowerCase();" +
-                    "  if (needles.some(n => t.includes(n) || a.includes(n))) return el;" +
-                    "}" +
-                    "return null;";
+                            "const els = Array.from(document.querySelectorAll('a,[role=\"link\"],div,span'));" +
+                            "for (const el of els) {" +
+                            "  const t = (el.innerText||'').toLowerCase();" +
+                            "  const a = (el.getAttribute('aria-label')||'').toLowerCase();" +
+                            "  if (needles.some(n => t.includes(n) || a.includes(n))) return el;" +
+                            "}" +
+                            "return null;";
             Object ret = ((JavascriptExecutor) driver).executeScript(script, (Object[]) needles);
             if (ret instanceof WebElement) {
                 return (WebElement) ret;
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return null;
     }
 }

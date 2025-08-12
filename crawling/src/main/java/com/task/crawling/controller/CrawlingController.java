@@ -31,4 +31,10 @@ public class CrawlingController {
         crawlingService.xInfoCrawling();
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @GetMapping("/tiktok-info")
+    public ResponseEntity<Void> tiktokInfoTask() throws Exception {
+        crawlingService.tiktokInfo();
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
