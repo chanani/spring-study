@@ -13,10 +13,16 @@ public class CrawlingController {
 
     private final CrawlingService crawlingService;
 
-    @GetMapping("/instagram")
-    public ResponseEntity<Void> instagramTask() throws Exception {
-        crawlingService.instagramCrawling();
+    @GetMapping("/instagram-feed")
+    public ResponseEntity<Void> instagramFeedTask() throws Exception {
+         crawlingService.instagramFeedCrawling();
 
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/instagram-info")
+    public ResponseEntity<Void> instagramInfoTask() throws Exception {
+        crawlingService.instagramInfoCrawling();
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
