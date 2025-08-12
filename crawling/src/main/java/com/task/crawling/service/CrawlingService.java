@@ -187,6 +187,135 @@ public class CrawlingService {
         }
     }
 
+    public void xInfoCrawling() throws Exception {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--start-maximized");
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        WebDriver driver = new ChromeDriver(options);
+
+        try {
+            driver.get(xUrl);
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+            // (선택) 팝업 닫기 시도
+            try {
+                WebElement dialogClose = new WebDriverWait(driver, Duration.ofSeconds(5))
+                        .until(ExpectedConditions.presenceOfElementLocated(
+                                By.cssSelector("div[role='dialog'] [aria-label*='Close'], button[aria-label*='Close'], button[id*='accept'], button[aria-label*='Accept']")));
+                dialogClose.click();
+            } catch (TimeoutException ignore) {}
+
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("main")));
+            // 렌더 지연 보정: 약간 스크롤하며 렌더 유도
+            try {
+                for (int i = 0; i < 3; i++) {
+                    ((JavascriptExecutor) driver).executeScript("window.scrollBy(0, arguments[0]);", 200 * (i + 1));
+                    Thread.sleep(300);
+                }
+            } catch (InterruptedException ignored) {}
+
+            long followers = 0L, following = 0L;
+
+
+            // ---- 팔로워 ----
+            WebElement followersLink = findFirstPresent(driver,
+                // CSS
+                "a[href$='/followers']",
+                "a[href*='/followers?']",
+                "a[role='link'][href*='/followers']",
+                "a[aria-label*='Followers']",
+                "[role='link'][aria-label*='Followers']",
+                "a[aria-label*='팔로워']",
+                "[role='link'][aria-label*='팔로워']",
+                // XPath
+                "//a[contains(@href,'/followers')]",
+                "//*[@role='link' and contains(@href,'/followers')]",
+                "//*[@role='link' and contains(translate(@aria-label,'FOLWERS','folwers'),'followers')]",
+                "//*[@role='link' and contains(@aria-label,'팔로워')]",
+                "//a[.//span[contains(translate(normalize-space(string(.)),'F','f'),'followers')]]",
+                "//*[contains(normalize-space(.), '팔로워')]/ancestor::a[1]"
+            );
+            if (followersLink == null) {
+                // JS로 innerText/aria-label 매칭 폴백
+                followersLink = queryByInnerTextJs(driver, "followers", "팔로워");
+            }
+            if (followersLink != null) {
+                ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView({block:'center'});", followersLink);
+                long v = extractPreciseCount(followersLink);
+                if (v == 0) {
+                    String inner = (String)((JavascriptExecutor)driver).executeScript("return arguments[0].innerText;", followersLink);
+                    if (inner != null && !inner.isEmpty()) v = extractCountFromText(inner);
+                }
+                if (v == 0) {
+                    String aria = followersLink.getAttribute("aria-label");
+                    if (aria != null && !aria.isEmpty()) v = extractCountFromText(aria);
+                }
+                followers = v;
+            } else {
+                log.warn("Followers link not found on X page");
+            }
+
+            // ---- 팔로잉 ----
+            WebElement followingLink = findFirstPresent(driver,
+                "a[href$='/following']",
+                "a[href*='/following?']",
+                "a[role='link'][href*='/following']",
+                "//a[contains(@href,'/following')]"
+            );
+            if (followingLink != null) {
+                ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView({block:'center'});", followingLink);
+                long v = extractPreciseCount(followingLink);
+                if (v == 0) {
+                    String inner = (String)((JavascriptExecutor)driver).executeScript("return arguments[0].innerText;", followingLink);
+                    if (inner != null && !inner.isEmpty()) v = extractCountFromText(inner);
+                }
+                if (v == 0) {
+                    String aria = followingLink.getAttribute("aria-label");
+                    if (aria != null && !aria.isEmpty()) v = extractCountFromText(aria);
+                }
+                following = v;
+            } else {
+                log.warn("Following link not found on X page");
+            }
+
+            // ---- 메타 백업(있을 때만) ----
+            if (followers == 0 || following == 0) {
+                try {
+                    WebElement metaDesc = driver.findElement(By.cssSelector("head meta[name='description']"));
+                    String desc = metaDesc.getAttribute("content"); // “… 4.5M Followers · 2 Following …” 등
+                    if (desc != null) {
+                        desc = desc.replace("·", " ");
+                        if (followers == 0) {
+                            java.util.regex.Matcher mfEn = java.util.regex.Pattern
+                                    .compile("(\\d[\\d,\\.]*)\\s*(K|M|B|thousand|million|billion)?\\s*Followers", java.util.regex.Pattern.CASE_INSENSITIVE)
+                                    .matcher(desc);
+                            java.util.regex.Matcher mfKo = java.util.regex.Pattern
+                                    .compile("팔로워\\s*(\\d[\\d,\\.]*)\\s*(억|백만|만|천)?")
+                                    .matcher(desc);
+                            if (mfEn.find()) followers = parseCount(mfEn.group(1) + " " + (mfEn.group(2) == null ? "" : mfEn.group(2)));
+                            else if (mfKo.find()) followers = parseCount(mfKo.group(1) + " " + (mfKo.group(2) == null ? "" : mfKo.group(2)));
+                        }
+                        if (following == 0) {
+                            java.util.regex.Matcher mgEn = java.util.regex.Pattern
+                                    .compile("(\\d[\\d,\\.]*)\\s*(K|M|B|thousand|million|billion)?\\s*Following", java.util.regex.Pattern.CASE_INSENSITIVE)
+                                    .matcher(desc);
+                            java.util.regex.Matcher mgKo = java.util.regex.Pattern
+                                    .compile("(?:팔로우|팔로잉)\\s*(\\d[\\d,\\.]*)\\s*(억|백만|만|천)?")
+                                    .matcher(desc);
+                            if (mgEn.find()) following = parseCount(mgEn.group(1) + " " + (mgEn.group(2) == null ? "" : mgEn.group(2)));
+                            else if (mgKo.find()) following = parseCount(mgKo.group(1) + " " + (mgKo.group(2) == null ? "" : mgKo.group(2)));
+                        }
+                    }
+                } catch (Exception ignore) {}
+            }
+
+            log.info("X profile info => followers={}, following={}", followers, following);
+        } finally {
+            driver.quit();
+        }
+    }
+
     // 유틸
     private String nullToEmpty(String s) { return s == null ? "" : s; }
 
@@ -310,5 +439,48 @@ public class CrawlingService {
         } catch (Exception ignored) {}
 
         return 0L;
+    }
+
+    /**
+     * 여러 CSS/XPath 셀렉터를 순서대로 시도하여 가장 먼저 발견되는 요소를 반환
+     * 메서드는 클래스 레벨에 있어야 하며, 메서드 안에 중첩 정의하면 컴파일 에러가 납니다.
+     */
+    private WebElement findFirstPresent(WebDriver driver, String... selectors) {
+        for (String sel : selectors) {
+            try {
+                List<WebElement> found;
+                if (sel.startsWith("//")) { // XPath
+                    found = driver.findElements(By.xpath(sel));
+                } else { // CSS
+                    found = driver.findElements(By.cssSelector(sel));
+                }
+                if (found != null && !found.isEmpty()) {
+                    return found.get(0);
+                }
+            } catch (Exception ignore) {}
+        }
+        return null;
+    }
+
+    /**
+     * JS로 여러 후보 노드를 훑으면서 innerText/aria-label에 키워드가 포함된 첫 요소 반환 (대소문자 무시)
+     */
+    private WebElement queryByInnerTextJs(WebDriver driver, String... needles) {
+        try {
+            String script =
+                    "const needles = Array.from(arguments).map(s => String(s).toLowerCase());" +
+                    "const els = Array.from(document.querySelectorAll('a,[role=\"link\"],div,span'));" +
+                    "for (const el of els) {" +
+                    "  const t = (el.innerText||'').toLowerCase();" +
+                    "  const a = (el.getAttribute('aria-label')||'').toLowerCase();" +
+                    "  if (needles.some(n => t.includes(n) || a.includes(n))) return el;" +
+                    "}" +
+                    "return null;";
+            Object ret = ((JavascriptExecutor) driver).executeScript(script, (Object[]) needles);
+            if (ret instanceof WebElement) {
+                return (WebElement) ret;
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 }

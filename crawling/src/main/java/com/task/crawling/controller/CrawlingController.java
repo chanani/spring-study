@@ -25,4 +25,10 @@ public class CrawlingController {
         crawlingService.instagramInfoCrawling();
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @GetMapping("/x-info")
+    public ResponseEntity<Void> xInfoTask() throws Exception {
+        crawlingService.xInfoCrawling();
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
