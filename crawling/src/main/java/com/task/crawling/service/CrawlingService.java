@@ -20,6 +20,7 @@ public class CrawlingService {
     private final String instagramUrl = "https://www.instagram.com/aespa_official/";
     private final String xUrl = "https://x.com/aespa_official";
     private final String tiktokUrl = "https://www.tiktok.com/@aespa_official";
+    private final String youtubeUrl = "https://www.youtube.com/channel/UC9GtSLeksfK4yuJ_g1lgQbg";
 
 
     public void instagramFeedCrawling() throws Exception {
@@ -531,6 +532,127 @@ public class CrawlingService {
             }
 
             log.info("TikTok profile info => followers={}, following={}, likes={}", followers, following, likes);
+
+        } finally {
+            driver.quit();
+        }
+    }
+
+    public void youtubeInfo() throws Exception {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--start-maximized");
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.addArguments("--lang=ko-KR");
+        WebDriver driver = new ChromeDriver(options);
+
+        try {
+            driver.get(youtubeUrl + "?hl=ko&gl=KR");
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("body")));
+
+            // 동의 배너 (있으면 시도, 실패해도 진행)
+            try {
+                // iframe 동의
+                List<WebElement> ifr = driver.findElements(By.cssSelector("iframe[src*='consent']"));
+                for (WebElement f : ifr) {
+                    try {
+                        driver.switchTo().frame(f);
+                        List<WebElement> btns = driver.findElements(By.cssSelector(
+                                "button[aria-label*='동의'],button[aria-label*='Accept'],button[aria-label*='I agree']"));
+                        if (!btns.isEmpty()) {
+                            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btns.get(0));
+                            driver.switchTo().defaultContent();
+                            break;
+                        }
+                    } catch (Exception ignored) {
+                    } finally {
+                        try { driver.switchTo().defaultContent(); } catch (Exception ignored2) {}
+                    }
+                }
+                // 라이트박스 동의
+                List<WebElement> btns = driver.findElements(By.cssSelector("#dialog button, tp-yt-paper-dialog tp-yt-paper-button"));
+                for (WebElement b : btns) {
+                    String t = (b.getText() == null ? "" : b.getText()).toLowerCase();
+                    String a = (b.getAttribute("aria-label") == null ? "" : b.getAttribute("aria-label")).toLowerCase();
+                    if (t.contains("동의") || a.contains("동의") || t.contains("accept") || a.contains("accept") || t.contains("agree") || a.contains("agree")) {
+                        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", b);
+                        break;
+                    }
+                }
+            } catch (Exception ignored) {}
+
+            // 렌더 유도
+            ((JavascriptExecutor) driver).executeScript("window.scrollBy(0,150);");
+
+            // metadata-row 텍스트를 JS로 폴링해서 확보
+            String metaLine = null;
+            for (int i = 0; i < 40; i++) { // 최대 ~10초
+                Object txt = ((JavascriptExecutor) driver).executeScript(
+                        "const row=document.querySelector('div.yt-content-metadata-view-model-wiz__metadata-row');" +
+                        "if(!row) return null;" +
+                        "const cells=[...row.querySelectorAll(\"span[role='text']\")].map(e=>e.innerText.trim()).filter(Boolean);" +
+                        "return cells.length?cells.join(' · '):null;"
+                );
+                if (txt != null) {
+                    metaLine = String.valueOf(txt);
+                    if (!metaLine.isBlank()
+                            && (metaLine.contains("구독자") || metaLine.toLowerCase().contains("subscribers"))
+                            && (metaLine.contains("동영상") || metaLine.toLowerCase().contains("videos"))) {
+                        break;
+                    }
+                }
+                try { Thread.sleep(250); } catch (InterruptedException ignored) {}
+            }
+
+            long subscribers = 0L;
+            long videos = 0L;
+
+            if (metaLine != null) {
+                // 구독자
+                java.util.regex.Matcher mKoS = java.util.regex.Pattern
+                        .compile("구독자\\s*(\\d[\\d,\\.]*)\\s*(억|백만|만|천)?\\s*명?")
+                        .matcher(metaLine);
+                java.util.regex.Matcher mEnS = java.util.regex.Pattern
+                        .compile("(\\d[\\d,\\.]*)\\s*(K|M|B|thousand|million|billion)?\\s*subscribers", java.util.regex.Pattern.CASE_INSENSITIVE)
+                        .matcher(metaLine);
+                if (mKoS.find()) subscribers = parseCount(mKoS.group(1) + " " + (mKoS.group(2) == null ? "" : mKoS.group(2)));
+                else if (mEnS.find()) subscribers = parseCount(mEnS.group(1) + " " + (mEnS.group(2) == null ? "" : mEnS.group(2)));
+
+                // 동영상
+                java.util.regex.Matcher mKoV = java.util.regex.Pattern
+                        .compile("동영상\\s*(\\d[\\d,\\.]*)\\s*(억|백만|만|천)?\\s*개?")
+                        .matcher(metaLine);
+                java.util.regex.Matcher mEnV = java.util.regex.Pattern
+                        .compile("(\\d[\\d,\\.]*)\\s*(K|M|B|thousand|million|billion)?\\s*videos?", java.util.regex.Pattern.CASE_INSENSITIVE)
+                        .matcher(metaLine);
+                if (mKoV.find()) videos = parseCount(mKoV.group(1) + " " + (mKoV.group(2) == null ? "" : mKoV.group(2)));
+                else if (mEnV.find()) videos = parseCount(mEnV.group(1) + " " + (mEnV.group(2) == null ? "" : mEnV.group(2)));
+            }
+
+            // 백업: 각 셀 텍스트 개별 취득
+            if (subscribers == 0 || videos == 0) {
+                try {
+                    Object sub = ((JavascriptExecutor) driver).executeScript(
+                            "const row=document.querySelector('div.yt-content-metadata-view-model-wiz__metadata-row');" +
+                            "if(!row) return null;" +
+                            "const el=[...row.querySelectorAll(\"span[role='text']\")]"
+                            + ".find(e=>/구독자|subscribers/i.test(e.innerText));"
+                            + "return el?el.innerText.trim():null;");
+                    if (subscribers == 0 && sub != null)
+                        subscribers = extractCountFromText(String.valueOf(sub));
+
+                    Object vid = ((JavascriptExecutor) driver).executeScript(
+                            "const row=document.querySelector('div.yt-content-metadata-view-model-wiz__metadata-row');" +
+                            "if(!row) return null;" +
+                            "const el=[...row.querySelectorAll(\"span[role='text']\")]"
+                            + ".find(e=>/동영상|videos/i.test(e.innerText));"
+                            + "return el?el.innerText.trim():null;");
+                    if (videos == 0 && vid != null)
+                        videos = extractCountFromText(String.valueOf(vid));
+                } catch (Exception ignored) {}
+            }
+
+            log.info("YouTube channel info => subscribers={}, videos={}", subscribers, videos);
 
         } finally {
             driver.quit();
