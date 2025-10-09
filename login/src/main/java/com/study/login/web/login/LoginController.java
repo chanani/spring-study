@@ -2,7 +2,9 @@ package com.study.login.web.login;
 
 import com.study.login.domain.login.LoginService;
 import com.study.login.domain.member.Member;
+import com.study.login.web.session.SessionManager;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +22,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class LoginController {
 
     private final LoginService loginService;
+    private final SessionManager sessionManager;
 
     @GetMapping("/login")
     public String loginForm(@ModelAttribute("loginForm") LoginForm loginForm) {
         return "login/loginForm";
     }
 
-    @PostMapping("/login")
+    //@PostMapping("/login")
     public String login(
             @Valid @ModelAttribute("loginForm") LoginForm loginForm,
             BindingResult bindingResult,
@@ -46,5 +49,44 @@ public class LoginController {
         Cookie idCookie = new Cookie("memberId", String.valueOf(loginMember.getId()));
         response.addCookie(idCookie);
         return "redirect:/";
+    }
+
+
+    @PostMapping("/login")
+    public String loginV2(
+            @Valid @ModelAttribute("loginForm") LoginForm loginForm,
+            BindingResult bindingResult,
+            HttpServletResponse response
+    ) {
+        if(bindingResult.hasErrors()) {
+            return "login/loginForm";
+        }
+        Member loginMember = loginService.login(loginForm.getLoginId(), loginForm.getPassword());
+        if(loginMember == null) {
+            bindingResult.reject("loginFail", "아이디 또는 비밀번호가 맞지 않습니다.");
+            return "login/loginForm";
+        }
+
+        // 세션 관리자를 통해 세션을 생성하고, 회원 데이터 관리
+        sessionManager.createSession(loginMember, response);
+        return "redirect:/";
+    }
+
+    // @PostMapping("/logout")
+    public String logout(HttpServletResponse response) {
+        expireCookie(response, "memberId");
+        return "redirect:/";
+    }
+
+    @PostMapping("/logout")
+    public String logoutV2(HttpServletRequest request) {
+        sessionManager.expire(request);
+        return "redirect:/";
+    }
+
+    private void expireCookie(HttpServletResponse response, String cookieName) {
+        Cookie cookie = new Cookie(cookieName, null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 }
