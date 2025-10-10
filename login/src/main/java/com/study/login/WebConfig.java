@@ -3,6 +3,7 @@ package com.study.login;
 import com.study.login.web.filter.LogFilter;
 import com.study.login.web.filter.LoginCheckFilter;
 import com.study.login.web.interceptor.LogInterceptor;
+import com.study.login.web.interceptor.LoginCheckInterceptor;
 import jakarta.servlet.Filter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,19 @@ public class WebConfig implements WebMvcConfigurer {
                         "/*.ico",
                         "/error"
                 );
+
+        registry.addInterceptor(new LoginCheckInterceptor())
+                .order(2)
+                .addPathPatterns("/**")
+                .excludePathPatterns(
+                        "/",
+                        "/members/add",
+                        "/login",
+                        "/logout",
+                        "/css/*",
+                        "/*.ico",
+                        "/error"
+                );
     }
 
     // @Bean
@@ -35,7 +49,7 @@ public class WebConfig implements WebMvcConfigurer {
         return filterRegistrationBean;
     }
 
-    @Bean
+    // @Bean
     public FilterRegistrationBean loginCheckFilter() {
         FilterRegistrationBean<Filter> filterRegistrationBean = new FilterRegistrationBean();
         filterRegistrationBean.setFilter(new LoginCheckFilter());
