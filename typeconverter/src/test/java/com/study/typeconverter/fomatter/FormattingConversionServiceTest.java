@@ -3,7 +3,6 @@ package com.study.typeconverter.fomatter;
 import com.study.typeconverter.converter.IpPortToStringConverter;
 import com.study.typeconverter.converter.StringToIpPortConverter;
 import com.study.typeconverter.type.IpPort;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.format.support.DefaultFormattingConversionService;
 
