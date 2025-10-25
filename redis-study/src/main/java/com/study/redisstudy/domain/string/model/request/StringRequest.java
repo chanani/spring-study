@@ -12,6 +12,6 @@ public record StringRequest(
         @Schema(description = "name")
         @NotBlank
         @NotNull
-        String Name
+        String name
 ) {
 }
