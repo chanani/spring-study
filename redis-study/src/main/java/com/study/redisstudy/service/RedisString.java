@@ -38,11 +38,11 @@ public class RedisString {
     }
 
     public void multiSet(MultiStringRequest req) {
-        Map<String, Object> dataMap = new HashMap<String, Object>();
+        Map<String, Object> dataMap = new HashMap<>();
 
         for (int i = 0; i < req.names().length; i++) {
             String name = req.names()[i];
-            String key = "key : " + (i + 1);
+            String key = "key:" + (i + 1);
             StringModel newModel = new StringModel(key, name);
             dataMap.put(key, newModel);
         }

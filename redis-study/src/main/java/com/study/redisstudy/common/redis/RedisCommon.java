@@ -43,7 +43,7 @@ public class RedisCommon {
     public <T> void multiSetData(Map<String, T> datas) {
         Map<String, String> jsonMap = new HashMap<>();
 
-        for (Map.Entry<String, String> entry : jsonMap.entrySet()) {
+        for (Map.Entry<String, T> entry : datas.entrySet()) {
             jsonMap.put(entry.getKey(), gson.toJson(entry.getValue()));
         }
 
