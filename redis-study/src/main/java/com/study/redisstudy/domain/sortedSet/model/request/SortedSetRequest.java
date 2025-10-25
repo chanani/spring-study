@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record SortedSetRequest(
-        BaseRequest baseRequest.BaseRequest,
+        BaseRequest baseRequest,
 
         @Schema(description = "name")
         @NotBlank

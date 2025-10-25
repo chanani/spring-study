@@ -72,9 +72,9 @@ public class RedisCommon {
     }
 
     // sortedSet으로 랭킹을 구하기 위한 함수
-    public <T> Set<T> getTopNFromSortedSet(String key, int n, Class<T> clazz) {
+    public <T> List<T> getTopNFromSortedSet(String key, int n, Class<T> clazz) {
         Set<String> jsonValues = template.opsForZSet().range(key, 0, n - 1);
-        Set<T> resultSet = new HashSet<>();
+        List<T> resultSet = new ArrayList<>();
         if (jsonValues != null) {
             for (String jsonValue : jsonValues) {
                 T v = gson.fromJson(jsonValue, clazz);

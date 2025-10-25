@@ -6,6 +6,7 @@ import com.study.redisstudy.domain.sortedSet.model.request.SortedSetRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -23,7 +24,7 @@ public class RedisSortedSet {
         return redis.rangeByScore(key, min, max, SortedSet.class);
     }
 
-    public Set<SortedSet> getTopN(String key, int n){
+    public List<SortedSet> getTopN(String key, int n){
         return redis.getTopNFromSortedSet(key, n, SortedSet.class);
     }
 }

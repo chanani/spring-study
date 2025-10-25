@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Tag(name = "sorted set", description = "sorted set api")
@@ -35,7 +36,7 @@ public class SortedSetController {
     }
 
     @GetMapping(value = "/get-sorted-set-by-top")
-    public Set<SortedSet> getTopN(
+    public List<SortedSet> getTopN(
             @RequestParam @Valid String key,
             @RequestParam @Valid Integer n
     ) {
