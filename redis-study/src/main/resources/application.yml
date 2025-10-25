@@ -1,0 +1,10 @@
+server:
+  port: 7002
+
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: root
+      default-time: 5m
