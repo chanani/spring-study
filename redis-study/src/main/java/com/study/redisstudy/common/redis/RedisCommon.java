@@ -8,10 +8,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -88,4 +85,59 @@ public class RedisCommon {
         return resultSet;
     }
 
+    // 리스트 타입 데이터 저장(left)
+    public <T> void addListLeft(String key, T value) {
+        String jsonValue = gson.toJson(value);
+        template.opsForList().leftPush(key, jsonValue);
+    }
+
+    // 리스트 타입 데이터 저장(right)
+    public <T> void addListRight(String key, T value) {
+        String jsonValue = gson.toJson(value);
+        template.opsForList().rightPush(key, jsonValue);
+    }
+
+    // 리스틑 조회
+    public <T> List<T> getAllList(String key, Class<T> clazz){
+        // 모든 값 조회(-1)
+        List<String> jsonValues = template.opsForList().range(key, 0, -1);
+        List<T> resultSet = new ArrayList<>();
+
+        if(jsonValues != null){
+            for(String jsonValue : jsonValues){
+                T value = gson.fromJson(jsonValue, clazz);
+                resultSet.add(value);
+            }
+        }
+
+        return resultSet;
+    }
+
+    // 리스트 삭제
+    public <T> void deleteFromList(String key, T value){
+        String jsonValue = gson.toJson(value);
+        template.opsForList().remove(key, 1, jsonValue);
+    }
+
+    // 해시 데이터 저장
+    public <T> void pushHash(String key, String field, T value) {
+        String jsonValue = gson.toJson(value);
+        template.opsForHash().put(key, field, jsonValue);
+    }
+
+    // 해시 조회
+    public <T> T getFromHash(String key, String field, Class<T> clazz) {
+        Object result = template.opsForHash().get(key, field);
+
+        if(result == null){
+            return clazz.cast(result);
+        }
+
+        return null;
+    }
+
+    // 해시 삭제
+    public void deleteFromHash(String key, String field) {
+        template.opsForHash().delete(key, field);
+    }
 }
