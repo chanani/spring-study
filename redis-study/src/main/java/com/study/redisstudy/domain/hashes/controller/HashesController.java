@@ -28,6 +28,7 @@ public class HashesController {
             @RequestParam @Valid String key,
             @RequestParam @Valid String filed
     ) {
+        System.out.println(redis.getFromHash(key, filed));
         return redis.getFromHash(key, filed);
     }
 
