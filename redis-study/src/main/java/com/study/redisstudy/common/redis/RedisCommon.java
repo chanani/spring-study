@@ -5,9 +5,13 @@ import com.study.redisstudy.domain.stategy.model.ValueWithTTL;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -155,18 +159,15 @@ public class RedisCommon {
     public <T> ValueWithTTL<T> getValueWithTTL(String key, Class<T> clazz) {
         T value = null;
         Long ttl = null;
+
         try {
-            List<Object> results = template.executePipelined((RedisCallback<Object>) connection -> {
-                connection.openPipeline();
-
-                StringRedisConnection conn = (StringRedisConnection) connection;
-
-                conn.get(key);
-                conn.pTtl(key);
-
-                connection.closePipeline();
-
-                return null;
+            List<Object> results = template.executePipelined(new RedisCallback<Object>() {
+                public Object doInRedis(RedisConnection connection) throws DataAccessException {
+                    StringRedisConnection conn = (StringRedisConnection) connection;
+                    conn.get(key);
+                    conn.pTtl(key);
+                    return null;
+                }
             });
 
             value = (T) gson.fromJson((String) results.get(0), clazz);
@@ -174,24 +175,33 @@ public class RedisCommon {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return new ValueWithTTL<T>(value, ttl);
     }
 
-    public Long sumTowKeyAndRenew(String script, String key1, String key2, String resultKey) {
-        return template.execute((RedisCallback<Long>) connection -> {
+    public Long sumTowKeyAndRenew(String key1, String key2, String resultKey) {
+//        return template.execute((RedisCallback<Long>) connection -> {
+//
+//            byte[] scriptBytes = script.getBytes();
+//            byte[] key1Bytes = key1.getBytes();
+//            byte[] key2Bytes = key2.getBytes();
+//            byte[] resultKeyBytes = resultKey.getBytes();
+//
+//            return (Long) connection.execute("EVAL",
+//                    scriptBytes,
+//                    key1Bytes,
+//                    key2Bytes,
+//                    resultKeyBytes
+//            );
+//        });
 
-            byte[] scriptBytes = script.getBytes();
-            byte[] key1Bytes = key1.getBytes();
-            byte[] key2Bytes = key2.getBytes();
-            byte[] resultKeyBytes = resultKey.getBytes();
+        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+        redisScript.setLocation(new ClassPathResource("/lua/newKey.lua"));
+        redisScript.setResultType(Long.class);
 
-            return (Long) connection.execute("EVAL",
-                    scriptBytes,
-                    key1Bytes,
-                    key2Bytes,
-                    resultKeyBytes
-            );
-        });
+        List<String> keys = Arrays.asList(key1, key2, resultKey);
+
+        return template.execute(redisScript, keys);
     }
 
 
