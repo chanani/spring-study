@@ -180,20 +180,6 @@ public class RedisCommon {
     }
 
     public Long sumTowKeyAndRenew(String key1, String key2, String resultKey) {
-//        return template.execute((RedisCallback<Long>) connection -> {
-//
-//            byte[] scriptBytes = script.getBytes();
-//            byte[] key1Bytes = key1.getBytes();
-//            byte[] key2Bytes = key2.getBytes();
-//            byte[] resultKeyBytes = resultKey.getBytes();
-//
-//            return (Long) connection.execute("EVAL",
-//                    scriptBytes,
-//                    key1Bytes,
-//                    key2Bytes,
-//                    resultKeyBytes
-//            );
-//        });
 
         DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
         redisScript.setLocation(new ClassPathResource("/lua/newKey.lua"));
