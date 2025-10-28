@@ -1,9 +1,12 @@
 package com.study.redisstudy.common.redis;
 
 import com.google.gson.Gson;
+import com.study.redisstudy.domain.stategy.model.ValueWithTTL;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.connection.StringRedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -98,13 +101,13 @@ public class RedisCommon {
     }
 
     // 리스틑 조회
-    public <T> List<T> getAllList(String key, Class<T> clazz){
+    public <T> List<T> getAllList(String key, Class<T> clazz) {
         // 모든 값 조회(-1)
         List<String> jsonValues = template.opsForList().range(key, 0, -1);
         List<T> resultSet = new ArrayList<>();
 
-        if(jsonValues != null){
-            for(String jsonValue : jsonValues){
+        if (jsonValues != null) {
+            for (String jsonValue : jsonValues) {
                 T value = gson.fromJson(jsonValue, clazz);
                 resultSet.add(value);
             }
@@ -114,7 +117,7 @@ public class RedisCommon {
     }
 
     // 리스트 삭제
-    public <T> void deleteFromList(String key, T value){
+    public <T> void deleteFromList(String key, T value) {
         String jsonValue = gson.toJson(value);
         template.opsForList().remove(key, 1, jsonValue);
     }
@@ -129,7 +132,7 @@ public class RedisCommon {
     public <T> T getFromHash(String key, String field, Class<T> clazz) {
         Object result = template.opsForHash().get(key, field);
 
-        if(result != null){
+        if (result != null) {
             return gson.fromJson(result.toString(), clazz);
         }
 
@@ -141,14 +144,55 @@ public class RedisCommon {
         template.opsForHash().delete(key, field);
     }
 
-    public void setBit(String key, long offset, boolean value){
+    public void setBit(String key, long offset, boolean value) {
         template.opsForValue().setBit(key, offset, value);
     }
 
-    public boolean getBit(String key, long offset){
+    public boolean getBit(String key, long offset) {
         return template.opsForValue().getBit(key, offset);
     }
 
+    public <T> ValueWithTTL<T> getValueWithTTL(String key, Class<T> clazz) {
+        T value = null;
+        Long ttl = null;
+        try {
+            List<Object> results = template.executePipelined((RedisCallback<Object>) connection -> {
+                connection.openPipeline();
+
+                StringRedisConnection conn = (StringRedisConnection) connection;
+
+                conn.get(key);
+                conn.pTtl(key);
+
+                connection.closePipeline();
+
+                return null;
+            });
+
+            value = (T) gson.fromJson((String) results.get(0), clazz);
+            ttl = (Long) results.get(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ValueWithTTL<T>(value, ttl);
+    }
+
+    public Long sumTowKeyAndRenew(String script, String key1, String key2, String resultKey) {
+        return template.execute((RedisCallback<Long>) connection -> {
+
+            byte[] scriptBytes = script.getBytes();
+            byte[] key1Bytes = key1.getBytes();
+            byte[] key2Bytes = key2.getBytes();
+            byte[] resultKeyBytes = resultKey.getBytes();
+
+            return (Long) connection.execute("EVAL",
+                    scriptBytes,
+                    key1Bytes,
+                    key2Bytes,
+                    resultKeyBytes
+            );
+        });
+    }
 
 
 }
