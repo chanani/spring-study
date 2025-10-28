@@ -4,16 +4,37 @@ import com.study.redisstudy.common.redis.RedisCommon;
 import com.study.redisstudy.domain.stategy.model.ValueWithTTL;
 import com.study.redisstudy.domain.string.model.StringModel;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
-public class RedisStrategyService {
+public class RedisStrategy {
 
     private final RedisCommon redis;
+    private final RedissonClient redissonClient;
+
+    // 락을 획득했을 떄만 redis 접근
+    public void lockSample() {
+        RLock lock = redissonClient.getLock("sample");
+
+        try {
+            boolean isLocked = lock.tryLock(10, 60, TimeUnit.SECONDS);
+
+            if (isLocked) {
+
+            }
+        } catch (InterruptedException e) {
+
+        }
+
+        lock.unlock();
+    }
 
     public StringModel simpleStrategy(String key) {
         StringModel model = redis.getData(key, StringModel.class);

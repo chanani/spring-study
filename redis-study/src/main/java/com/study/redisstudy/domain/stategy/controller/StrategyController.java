@@ -1,6 +1,6 @@
 package com.study.redisstudy.domain.stategy.controller;
 
-import com.study.redisstudy.service.RedisStrategyService;
+import com.study.redisstudy.service.RedisStrategy;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class StrategyController {
 
-    private final RedisStrategyService service;
+    private final RedisStrategy service;
 
     @GetMapping(value = "/lua-script")
     public void luaScript(
