@@ -13,7 +13,7 @@ jpawebapplication/build
 jpawebapplication/.gradle
 jpawebapplication/src/main/generated
 data-jpa/.idea
-data-jpa/gradle
+data-jpa/.gradle
 data-jpa/build
 data-jpa/src/main/generated
 querydsl/.idea

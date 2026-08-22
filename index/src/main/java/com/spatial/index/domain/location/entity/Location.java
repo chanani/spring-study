@@ -1,4 +1,4 @@
-package com.spatial.index.domain.map.entity;
+package com.spatial.index.domain.location.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
