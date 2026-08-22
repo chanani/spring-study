@@ -15,7 +15,6 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
             SELECT l FROM Location l
             WHERE l.lat BETWEEN :swLat AND :neLat
               AND l.lng BETWEEN :swLng AND :neLng
-            ORDER BY l.id
             """)
     List<Location> findInBounds(@Param("swLat") BigDecimal swLat,
                                 @Param("neLat")BigDecimal neLat,

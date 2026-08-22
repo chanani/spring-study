@@ -7,6 +7,8 @@ import com.spatial.index.domain.locationPoint.repository.LocationPointProjection
 import com.spatial.index.domain.locationPoint.repository.LocationPointRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.locationtech.jts.geom.Polygon;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,6 +19,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class LocationPointService {
+
     private static final int MAX_LIMIT = 2000;
 
     private final LocationPointRepository locationPointRepository;
@@ -27,18 +30,18 @@ public class LocationPointService {
 
         int limit = Math.min(request.limit(), MAX_LIMIT);
 
-        List<LocationPointProjection> rows = locationPointRepository.findInBounds(
-                request.swLat(), request.neLat(),
-                request.swLng(), request.neLng(),
-                limit
-        );
+        String bounds = LocationGeometry.boundsPolygon(
+                request.swLat(), request.swLng(),
+                request.neLat(), request.neLng());
+
+        List<LocationPointProjection> rows =
+                locationPointRepository.findInBounds(bounds, PageRequest.of(0, limit));
 
         long tFetched = System.nanoTime();
 
         List<LocationsResponse> result = rows.stream()
                 .map(r -> new LocationsResponse(
-                        r.getId(),
-                        r.getName(),
+                        r.getId(), r.getName(),
                         BigDecimal.valueOf(r.getLat()).setScale(7, RoundingMode.HALF_UP),
                         BigDecimal.valueOf(r.getLng()).setScale(7, RoundingMode.HALF_UP)))
                 .toList();

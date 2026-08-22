@@ -25,6 +25,6 @@ public class LocationPoint {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "location", nullable = false, columnDefinition = "POINT SRID 4326")
+    @Column(name = "location", updatable = false, nullable = false, columnDefinition = "POINT SRID 4326")
     private Point location;
 }
