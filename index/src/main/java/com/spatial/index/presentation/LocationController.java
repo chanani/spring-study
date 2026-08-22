@@ -20,10 +20,15 @@ public class LocationController {
 
     private final LocationService locationService;
 
-    @GetMapping(value = "/api/v1/locations")
+    @GetMapping(value = "/locations")
     public ResponseEntity<List<LocationsResponse>> getLocations(@ModelAttribute @Valid BoundsRequest request) {
         List<LocationsResponse> locations = locationService.findInBounds(request);
         return ResponseEntity.ok(locations);
     }
 
+    @GetMapping(value = "/fullscan")
+    public ResponseEntity<List<LocationsResponse>> getByFullScan(@ModelAttribute @Valid BoundsRequest request) {
+        List<LocationsResponse> locations = locationService.findAllFullScan(request);
+        return ResponseEntity.ok(locations);
+    }
 }

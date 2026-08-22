@@ -22,7 +22,7 @@ public record BoundsRequest(
 
         Integer zoom,
 
-        @Min(1) @Max(500)
+        @Min(1) @Max(2000)
         Integer limit
 ) {
 }

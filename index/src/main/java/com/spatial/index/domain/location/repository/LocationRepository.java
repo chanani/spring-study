@@ -22,4 +22,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
                                 @Param("swLng")BigDecimal swLng,
                                 @Param("neLng")BigDecimal neLng,
                                 Pageable pageable);
+
+    @Query("SELECT l FROM Location l")
+    List<Location> findAllForFullScan();
 }
